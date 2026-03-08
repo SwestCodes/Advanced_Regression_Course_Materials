@@ -126,12 +126,12 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 ## Instructions
 
-There are **4 sets of questions** to be answered. You can earn up to **100 points + bonus questions**. Points are indicated next to each question.
+There are **4 sets of questions** to be answered. You can earn up to **100 points + 10 bonus points**. Points are indicated next to each question.
 
 Remember to:
 
 - Format your tables using `stargazer`
-- Answer all parts of each questions
+- Answer all parts of each question
 - Submit the R markdown file & HTML with all your code
 - **Bold your answers**
 
@@ -184,9 +184,9 @@ library(dplyr)        # Data manipulation
 
 ## Lab Questions
 
-### Question 1: The DID Model
+### Question 1: The DID Model (10 points)
 
-#### Q1: Write down the difference-in-difference formula and build the model using the variables in our dataset.
+#### Q1: Write down the difference-in-difference formula and build the model using the variables in our dataset. (10 points)
   > **Note: **Write the formula in the asterisks, build the model using lm() in the code chunk. Extra kudos if you utilize LaTeX for your formula as shown in the codethrough.
   
 ```{r}
@@ -534,7 +534,7 @@ cat(
 
 ---
 
-### BONUS Question (10 points)
+### Bonus: DID vs ITS Comparison (10 points)
 
 #### BQ: Why does the DID model report a smaller program impact (a3) than the ITS immediate effect (b2)? (10 points)
 
@@ -556,15 +556,15 @@ When you have completed your assignment, knit your RMD file to generate your ren
 
 **Remember to:**
 
-* Include your name as the author in the YAML header
-* Name your files according to the convention: `Lab-##-LastName.Rmd`
-* Show your solution and include your code
-* Format your regression tables using `stargazer`
-* **Bold your answers**
-* Do **NOT** print excessive output (like a full data set)
-* Follow appropriate style guidelines (spaces between arguments, etc.)
+* Include your name as the author in the YAML header.
+* Name your files according to the convention: `Lab-##-LastName.Rmd`.
+* Show your solution and include your code.
+* Format your regression tables using `stargazer`.
+* **Bold your answers.**
+* Do **NOT** print excessive output (like a full data set).
+* Follow appropriate style guidelines (spaces between arguments, etc.).
 
-*Note: Platforms like Canvas sometimes disallow HTML file submissions when there is embedded computer code. If this happens, create a zipped folder with both the RMD and HTML files.*
+*Note: Canvas sometimes disallows HTML file submissions when there is embedded computer code. If this happens, create a zipped folder with both the RMD and HTML files.*
 
 ```
 ds4ps
@@ -575,10 +575,10 @@ PE4PS
 Labs designed by Federica Fusi & Jesse Lecy
 Source code is available on GitHub
 
-Creative Common License:
+Creative Commons License:
 (CC BY-NC-SA 4.0)
 
-CPP 525 Foundations of Program Eval III
+PAF 512 - Advanced Regression
 Part of the MS in Evaluation and Analytics
 @ Arizona State University
 

@@ -2597,10 +2597,10 @@ mean_rules &lt;- mean(recid$rules)
 
 # The &quot;average&quot; person at mean values of all variables
 data.frame(mean_workprg, mean_priors, mean_tserved, mean_felon, mean_alcohol, mean_drugs, mean_black, mean_married, mean_educ, mean_age, mean_rules)</code></pre>
-<pre><code>##   mean_workprg mean_priors mean_tserved mean_felon mean_alcohol mean_drugs
-## 1    0.4650519    1.431834     19.18201  0.3141869    0.2096886  0.2415225
-##   mean_black mean_married mean_educ mean_age mean_rules
-## 1  0.4851211    0.2553633  9.702422  345.436   1.185467</code></pre>
+<pre><code>##   mean_workprg mean_priors mean_tserved mean_felon mean_alcohol mean_drugs mean_black mean_married mean_educ mean_age
+## 1    0.4650519    1.431834     19.18201  0.3141869    0.2096886  0.2415225  0.4851211    0.2553633  9.702422  345.436
+##   mean_rules
+## 1   1.185467</code></pre>
 <pre class="r"><code># Extract coefficients
 b &lt;- coef(logit_model)
 

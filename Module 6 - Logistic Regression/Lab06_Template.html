@@ -1797,43 +1797,29 @@ data$Catholics_s &lt;- round(data$Catholics * 100, 5)
 
 # Preview Results
 head(data)</code></pre>
-<pre><code>##   Adoption Democrats Evangelics Catholics Media Merck Democrats_s Evangelics_s
-## 1        0      0.36       0.00      0.14   502  2914          36            0
-## 2        0      0.57       0.82      0.58   150  1636          57           82
-## 3        1      0.53       0.62      0.26   144  4153          53           62
-## 4        1      0.91       0.66      0.14    31  4311          91           66
-## 5        1      0.00       0.56      0.41   277  4643           0           56
-## 6        0      0.66       0.57      0.52   800  2378          66           57
-##   Catholics_s
-## 1          14
-## 2          58
-## 3          26
-## 4          14
-## 5          41
-## 6          52</code></pre>
+<pre><code>##   Adoption Democrats Evangelics Catholics Media Merck Democrats_s Evangelics_s Catholics_s
+## 1        0      0.36       0.00      0.14   502  2914          36            0          14
+## 2        0      0.57       0.82      0.58   150  1636          57           82          58
+## 3        1      0.53       0.62      0.26   144  4153          53           62          26
+## 4        1      0.91       0.66      0.14    31  4311          91           66          14
+## 5        1      0.00       0.56      0.41   277  4643           0           56          41
+## 6        0      0.66       0.57      0.52   800  2378          66           57          52</code></pre>
 <pre class="r"><code># Confirm scaled variables are contained between 0 and 100 now
 summary(data)</code></pre>
-<pre><code>##     Adoption        Democrats        Evangelics       Catholics     
-##  Min.   :0.0000   Min.   :0.0000   Min.   :0.0000   Min.   :0.0000  
-##  1st Qu.:0.0000   1st Qu.:0.3300   1st Qu.:0.4600   1st Qu.:0.2700  
-##  Median :0.0000   Median :0.4200   Median :0.6200   Median :0.3900  
-##  Mean   :0.3265   Mean   :0.4627   Mean   :0.5984   Mean   :0.3922  
-##  3rd Qu.:1.0000   3rd Qu.:0.5800   3rd Qu.:0.7500   3rd Qu.:0.5200  
-##  Max.   :1.0000   Max.   :1.0000   Max.   :1.0000   Max.   :1.0000  
-##      Media           Merck       Democrats_s      Evangelics_s   
-##  Min.   :  0.0   Min.   :   0   Min.   :  0.00   Min.   :  0.00  
-##  1st Qu.:236.0   1st Qu.:2501   1st Qu.: 33.00   1st Qu.: 46.00  
-##  Median :321.0   Median :3073   Median : 42.00   Median : 62.00  
-##  Mean   :331.4   Mean   :3134   Mean   : 46.27   Mean   : 59.84  
-##  3rd Qu.:464.0   3rd Qu.:3932   3rd Qu.: 58.00   3rd Qu.: 75.00  
-##  Max.   :800.0   Max.   :5000   Max.   :100.00   Max.   :100.00  
-##   Catholics_s    
-##  Min.   :  0.00  
-##  1st Qu.: 27.00  
-##  Median : 39.00  
-##  Mean   : 39.22  
-##  3rd Qu.: 52.00  
-##  Max.   :100.00</code></pre>
+<pre><code>##     Adoption        Democrats        Evangelics       Catholics          Media           Merck       Democrats_s    
+##  Min.   :0.0000   Min.   :0.0000   Min.   :0.0000   Min.   :0.0000   Min.   :  0.0   Min.   :   0   Min.   :  0.00  
+##  1st Qu.:0.0000   1st Qu.:0.3300   1st Qu.:0.4600   1st Qu.:0.2700   1st Qu.:236.0   1st Qu.:2501   1st Qu.: 33.00  
+##  Median :0.0000   Median :0.4200   Median :0.6200   Median :0.3900   Median :321.0   Median :3073   Median : 42.00  
+##  Mean   :0.3265   Mean   :0.4627   Mean   :0.5984   Mean   :0.3922   Mean   :331.4   Mean   :3134   Mean   : 46.27  
+##  3rd Qu.:1.0000   3rd Qu.:0.5800   3rd Qu.:0.7500   3rd Qu.:0.5200   3rd Qu.:464.0   3rd Qu.:3932   3rd Qu.: 58.00  
+##  Max.   :1.0000   Max.   :1.0000   Max.   :1.0000   Max.   :1.0000   Max.   :800.0   Max.   :5000   Max.   :100.00  
+##   Evangelics_s     Catholics_s    
+##  Min.   :  0.00   Min.   :  0.00  
+##  1st Qu.: 46.00   1st Qu.: 27.00  
+##  Median : 62.00   Median : 39.00  
+##  Mean   : 59.84   Mean   : 39.22  
+##  3rd Qu.: 75.00   3rd Qu.: 52.00  
+##  Max.   :100.00   Max.   :100.00</code></pre>
 </div>
 <div id="variable-descriptions" class="section level3">
 <h3>Variable Descriptions</h3>

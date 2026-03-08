@@ -131,8 +131,9 @@ There are **4 sets of questions** to be answered. You can earn up to **100 point
 Remember to:
 
 - Format your tables using `stargazer`
+- Answer all parts of each question
+- Submit the R markdown file & HTML with all your code
 - **Bold your answers**
-- Submit your R Markdown file and knitted HTML
 
 ---
 
@@ -363,7 +364,7 @@ fixef(fe_plm)
 
 ---
 
-### Bonus: De-Meaning Approach
+### Bonus: De-Meaning Approach (10 points)
 
 Fixed effects can also be estimated by "de-meaning" the data—subtracting each group's mean from every observation. This removes all between-group variation, leaving only within-group variation.
 
@@ -419,7 +420,7 @@ When you have completed your assignment, knit your RMD file to generate your ren
 * Do **NOT** print excessive output (like a full data set).
 * Follow appropriate style guidelines (spaces between arguments, etc.).
 
-*Note: Platforms like BlackBoard and Canvas sometimes disallow you from submitting HTML files when there is embedded computer code. If this happens, create a zipped folder with both the RMD and HTML files.*
+*Note: Canvas sometimes disallows HTML file submissions when there is embedded computer code. If this happens, create a zipped folder with both the RMD and HTML files.*
 
 ```
 ds4ps
@@ -430,10 +431,10 @@ PE4PS
 Labs designed by Federica Fusi & Jesse Lecy
 Source code is available on GitHub
 
-Creative Common License:
+Creative Commons License:
 (CC BY-NC-SA 4.0)
 
-CPP 525 Foundations of Program Eval III
+PAF 512 - Advanced Regression
 Part of the MS in Evaluation and Analytics
 @ Arizona State University
 

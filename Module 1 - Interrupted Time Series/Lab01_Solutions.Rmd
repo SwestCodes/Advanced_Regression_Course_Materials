@@ -125,7 +125,15 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ---
 
 ## Instructions
-There are **4 sets of questions** to be answered. You can earn up to 100 points + bonus questions. Points are indicated next to each question.
+
+There are **4 sets of questions** to be answered. You can earn up to **100 points + 10 bonus points**. Points are indicated next to each question.
+
+Remember to:
+
+- Format your tables using `stargazer`
+- Answer all parts of each question
+- Submit the R markdown file & HTML with all your code
+- **Bold your answers**
 
 ---
 
@@ -208,7 +216,7 @@ abline(v=120, col='red', lty=2) # Vertical line at
 
 #### Q2a: Run the standard Interrupted Time Series model using OLS (lm) and print the results in a Stargazer table. (10 points)
 ```{r, results = 'asis'}
-# Reminder: While completing your lab, set type = "html" for your stargazer(), but, remember to set type = "html" when you are ready to knit and submit your lab. You will also need to include in your code chunk header results =' asis' to properly render the table in the knitted HTML file. Your code chunk header should look like this: ```{r, results = 'asis'}
+# Reminder: While completing your lab, set type = "text" for your stargazer(), but, remember to set type = "html" when you are ready to knit and submit your lab. You will also need to include in your code chunk header results =' asis' to properly render the table in the knitted HTML file. Your code chunk header should look like this: ```{r, results = 'asis'}
 
 # Build your ITS Model
 ITS <- lm(Passengers ~ Time + Treatment + TimeSince, data = d)
@@ -223,21 +231,13 @@ stargazer(ITS,
 #### Q2b: Define and interpret the following coefficients, including their significance levels and their practical meaning in the context of our policy intervention: (5 points each)
 > Note: Define what the coefficient represents, its value, significance level, and the meaning of the number in terms of our data context (e.g. a coefficient of 100 would be 100,000 passengers).
 
-**Intercept** ($b_0$): 
+**Intercept ($b_0$): The intercept represents the average number of passengers when all other variables are equal to 0. In other words, the average number of passengers at the point in time prior to the start of our data was approximately $1,327$ thousand passengers ($1.33$ million passengers). This coefficient is statistically significant because it is different from $0$.**
 
-  - **The intercept represents the average number of passengers when all other variables are equal to 0. In other words, the average number of passengers at the point in time prior to the start of our data was approximately** $1,327$ **thousand passengers (** $1.33$ **million passengers. This coefficient is statistically significant because it is different from** $0$ **.**
-  
-**Time** ($b_1$):  
+**Time ($b_1$): The pre-intervention slope, or the average change in passengers for each additional day before the intervention. The coefficient of $0.11$ indicates that, on average, there was an increase of $0.11$ thousand passengers (or $110$ passengers) per day before the intervention. This coefficient is not statistically significant.**
 
-  - **The pre-intervention slope, or the average change in passengers for each additional day before the intervention. The coefficient of** $0.11$ **indicates that, on average, there was an increase of** $0.11$ **thousand passengers (or ** $110$ **passengers) per day before the intervention. This coefficient is not statistically significant.**
-  
-**Treatment** ($b_2$):  
+**Treatment ($b_2$): The immediate effect of the intervention on the number of passengers. The coefficient of $22.19$ indicates that there was an immediate increase of $22.19$ thousand passengers (or $22,190$ passengers) on the day of the intervention (T=121). The Treatment coefficient was not statistically significant, suggesting the new bus schedule did not have an immediate effect on ridership.**
 
-  - **The immediate effect of the intervention on the number of passengers. The coefficient of** $22.19$ **indicates that there was an immediate increase of** $22.19$ **thousand passengers (or** $22,190$ **passengers) on the day of the intervention (T=121). The Treatment coefficient was not statistically significant, suggesting the new bus schedule did not have an immediate effect on ridership.**
-  
-**TimeSince** ($b_3$):
-
-  - **The sustained effect of the intervention on the number of passengers. The coefficient of** $0.50$ **suggests that there was a statistically significant increase in the pre-intervention slope **($b_1$) **by approximately** $0.5$ **thousand passengers per day (or ** $500$ **passengers) after the new bus schedules. This demonstrates that the intervention had a sustained effect.**
+**TimeSince ($b_3$): The sustained effect of the intervention on the number of passengers. The coefficient of $0.50$ suggests that there was a statistically significant increase in the pre-intervention slope ($b_1$) by approximately $0.5$ thousand passengers per day (or $500$ passengers) after the new bus schedules. This demonstrates that the intervention had a sustained effect.**
   
 ---
 
@@ -258,7 +258,7 @@ acf(residuals(ITS))
 #### Q3b: Re-estimate your model using Robust Standard Errors. Use the Newey-West function (from sandwich package) to calculate the robust standard errors. Then, use stargazer to display the Naive Model (from Q2) and the Robust Model side-by-side. (10 points)
 
 ```{r, results = 'asis'}
-# Reminder: While completing your lab, set type = "html" for your stargazer(), but, remember to set type = "html" when you are ready to knit and submit your lab. You will also need to include in your code chunk header results =' asis' to properly render the table in the knitted HTML file. Your code chunk header should look like this: ```{r, results = 'asis'}
+# Reminder: While completing your lab, set type = "text" for your stargazer(), but, remember to set type = "html" when you are ready to knit and submit your lab. You will also need to include in your code chunk header results =' asis' to properly render the table in the knitted HTML file. Your code chunk header should look like this: ```{r, results = 'asis'}
 
 # Calculate Robust Standard Errors
 robust_se <- sqrt(diag(NeweyWest(ITS)))
@@ -334,7 +334,7 @@ round(d$Passengers[d$Time == 150] - cf_150, 0)
 
 ---
 
-### Bonus: Control Groups
+### Bonus: Control Groups (10 points)
 
 We have learned that there are threats to the validity of time series analysis. In particular, another event might have occurred at the same time of the intervention and caused the immediate and sustained effect that we observe.
 
@@ -390,7 +390,7 @@ When you have completed your assignment, knit your RMD file to generate your ren
 * Do **NOT** print excessive output (like a full data set).
 * Follow appropriate style guidelines (spaces between arguments, etc.).
 
-*Note: Platforms like BlackBoard and Canvas sometimes disallow you from submitting HTML files when there is embedded computer code. If this happens, create a zipped folder with both the RMD and HTML files.*
+*Note: Canvas sometimes disallows HTML file submissions when there is embedded computer code. If this happens, create a zipped folder with both the RMD and HTML files.*
 
 ```
 ds4ps
@@ -401,10 +401,10 @@ PE4PS
 Labs designed by Federica Fusi & Jesse Lecy
 Source code is available on GitHub
 
-Creative Common License:
+Creative Commons License:
 (CC BY-NC-SA 4.0)
 
-CPP 525 Foundations of Program Eval III
+PAF 512 - Advanced Regression
 Part of the MS in Evaluation and Analytics
 @ Arizona State University
 

@@ -1794,27 +1794,20 @@ data &lt;- read.csv(URL, stringsAsFactors = FALSE)
 
 # Preview the data
 head(data)</code></pre>
-<pre><code>##   X PublicHousing HealthStatus   Supply WaitingTime HealthBehavior    Stamp
-## 1 1      17.69557     7.373318 4.824089    18.65725       8.704722 182.6034
-## 2 2      38.95437    13.160057 6.126558    34.21815      12.840451 224.3674
-## 3 3      34.88688    11.428416 5.793093    34.73621      10.934191 234.1428
-## 4 4      17.10150     7.057165 6.265462    18.26504       8.095263 242.3071
-## 5 5      44.35689    14.637337 4.873442    35.21419      16.327103 206.1173
-## 6 6      27.81436    11.293658 4.008222    17.40875      15.442684 208.1609
-##   ParentsHealthStatus      Age Race Education MaritalStatus Race_4 Race_3
-## 1            2.619932 45.31420    4         1             3      1      0
-## 2           19.300365 50.37412    4         1             2      1      0
-## 3           11.824954 40.98947    3         1             3      0      1
-## 4            7.256021 45.55414    3         1             2      0      1
-## 5           11.155997 41.09823    1         1             4      0      0
-## 6            5.286644 43.35642    3         1             2      0      1
-##   Race_1 Race_2 MaritalStatus_3 MaritalStatus_2 MaritalStatus_4 MaritalStatus_1
-## 1      0      0               1               0               0               0
-## 2      0      0               0               1               0               0
-## 3      0      0               1               0               0               0
-## 4      0      0               0               1               0               0
-## 5      1      0               0               0               1               0
-## 6      0      0               0               1               0               0</code></pre>
+<pre><code>##   X PublicHousing HealthStatus   Supply WaitingTime HealthBehavior    Stamp ParentsHealthStatus      Age Race Education
+## 1 1      17.69557     7.373318 4.824089    18.65725       8.704722 182.6034            2.619932 45.31420    4         1
+## 2 2      38.95437    13.160057 6.126558    34.21815      12.840451 224.3674           19.300365 50.37412    4         1
+## 3 3      34.88688    11.428416 5.793093    34.73621      10.934191 234.1428           11.824954 40.98947    3         1
+## 4 4      17.10150     7.057165 6.265462    18.26504       8.095263 242.3071            7.256021 45.55414    3         1
+## 5 5      44.35689    14.637337 4.873442    35.21419      16.327103 206.1173           11.155997 41.09823    1         1
+## 6 6      27.81436    11.293658 4.008222    17.40875      15.442684 208.1609            5.286644 43.35642    3         1
+##   MaritalStatus Race_4 Race_3 Race_1 Race_2 MaritalStatus_3 MaritalStatus_2 MaritalStatus_4 MaritalStatus_1
+## 1             3      1      0      0      0               1               0               0               0
+## 2             2      1      0      0      0               0               1               0               0
+## 3             3      0      1      0      0               1               0               0               0
+## 4             2      0      1      0      0               0               1               0               0
+## 5             4      0      0      1      0               0               0               1               0
+## 6             2      0      1      0      0               0               1               0               0</code></pre>
 <hr />
 </div>
 </div>
@@ -4046,8 +4039,8 @@ the true causal effect.</strong></p>
 <hr />
 </div>
 </div>
-<div id="bonus-question-real-world-interpretation-10-points" class="section level3">
-<h3>BONUS Question: Real-World Interpretation (10 points)</h3>
+<div id="bonus-real-world-interpretation-10-points" class="section level3">
+<h3>Bonus: Real-World Interpretation (10 points)</h3>
 <p>Imagine you are explaining your results to a city council considering
 expanding public housing.</p>
 <div id="bq1a-from-your-summary-statistics-identify-the-average-years-spent-in-public-housing-and-the-value-at-the-75th-percentile." class="section level4">
@@ -4130,10 +4123,9 @@ set).</li>
 <li>Follow appropriate style guidelines (spaces between arguments,
 etc.).</li>
 </ul>
-<p><em>Note: Platforms like BlackBoard and Canvas sometimes disallow you
-from submitting HTML files when there is embedded computer code. If this
-happens, create a zipped folder with both the RMD and HTML
-files.</em></p>
+<p><em>Note: Canvas sometimes disallows HTML file submissions when there
+is embedded computer code. If this happens, create a zipped folder with
+both the RMD and HTML files.</em></p>
 <pre><code>ds4ps
 Prog Eval for
 Public Service
@@ -4142,10 +4134,10 @@ PE4PS
 Labs designed by Federica Fusi &amp; Jesse Lecy
 Source code is available on GitHub
 
-Creative Common License:
+Creative Commons License:
 (CC BY-NC-SA 4.0)
 
-CPP 525 Foundations of Program Eval III
+PAF 512 - Advanced Regression
 Part of the MS in Evaluation and Analytics
 @ Arizona State University
 

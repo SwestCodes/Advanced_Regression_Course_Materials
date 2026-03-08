@@ -424,8 +424,7 @@ coef_summary <- data.frame(
     "Difference between groups before treatment",
     "Change in control group over time (secular trend)",
     "Additional change in treatment group (treatment effect)"),
-
-Hypothesis = c(
+  Hypothesis = c(
     "Is control pre-treatment mean ≠ 0?",
     "Did groups differ before treatment?",
     "Did control group change over time?",

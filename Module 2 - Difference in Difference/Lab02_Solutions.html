@@ -1666,12 +1666,12 @@ in a loss of credit.</p></li>
 <div id="instructions" class="section level2">
 <h2>Instructions</h2>
 <p>There are <strong>4 sets of questions</strong> to be answered. You
-can earn up to <strong>100 points + bonus questions</strong>. Points are
+can earn up to <strong>100 points + 10 bonus points</strong>. Points are
 indicated next to each question.</p>
 <p>Remember to:</p>
 <ul>
 <li>Format your tables using <code>stargazer</code></li>
-<li>Answer all parts of each questions</li>
+<li>Answer all parts of each question</li>
 <li>Submit the R markdown file &amp; HTML with all your code</li>
 <li><strong>Bold your answers</strong></li>
 </ul>
@@ -1760,11 +1760,11 @@ library(dplyr)        # Data manipulation</code></pre>
 </div>
 <div id="lab-questions" class="section level2">
 <h2>Lab Questions</h2>
-<div id="question-1-the-did-model" class="section level3">
-<h3>Question 1: The DID Model</h3>
-<div id="q1-write-down-the-difference-in-difference-formula-and-build-the-model-using-the-variables-in-our-dataset." class="section level4">
+<div id="question-1-the-did-model-10-points" class="section level3">
+<h3>Question 1: The DID Model (10 points)</h3>
+<div id="q1-write-down-the-difference-in-difference-formula-and-build-the-model-using-the-variables-in-our-dataset.-10-points" class="section level4">
 <h4>Q1: Write down the difference-in-difference formula and build the
-model using the variables in our dataset.</h4>
+model using the variables in our dataset. (10 points)</h4>
 <blockquote>
 <p><strong>Note: </strong>Write the formula in the asterisks, build the
 model using lm() in the code chunk. Extra kudos if you utilize LaTeX for
@@ -2097,20 +2097,13 @@ interventions using a different dataset with monthly observations.</p>
 URL2 &lt;- &quot;https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/labs/DATA/time-series-diff-n-diff-comparison.csv&quot;
 dat &lt;- read.csv(URL2, stringsAsFactors = FALSE)
 rbind(head(dat, 3), tail(dat, 3))</code></pre>
-<pre><code>##      nhood quadrant   group month year time treat post.treat time.since crimes
-## 1    NH-01      Q-A   treat     1 1994    1     1          0          0    107
-## 2    NH-01      Q-B control     1 1994    1     0          0          0     96
-## 3    NH-01      Q-C   treat     1 1994    1     1          0          0     92
-## 1246 NH-04      Q-X control    12 1997   48     0          1         24    192
-## 1247 NH-04      Q-Y   treat    12 1997   48     1          1         24    214
-## 1248 NH-04      Q-Z control    12 1997   48     0          1         24    196
-##      treat.x.post
-## 1               0
-## 2               0
-## 3               0
-## 1246            0
-## 1247            1
-## 1248            0</code></pre>
+<pre><code>##      nhood quadrant   group month year time treat post.treat time.since crimes treat.x.post
+## 1    NH-01      Q-A   treat     1 1994    1     1          0          0    107            0
+## 2    NH-01      Q-B control     1 1994    1     0          0          0     96            0
+## 3    NH-01      Q-C   treat     1 1994    1     1          0          0     92            0
+## 1246 NH-04      Q-X control    12 1997   48     0          1         24    192            0
+## 1247 NH-04      Q-Y   treat    12 1997   48     1          1         24    214            1
+## 1248 NH-04      Q-Z control    12 1997   48     0          1         24    196            0</code></pre>
 <p>This dataset contains 48 months of data. The vacant lot clean-up
 occurred between months 24 and 25.</p>
 <div id="visualize-the-data" class="section level4">
@@ -2622,8 +2615,8 @@ using different approaches.</strong></p>
 <hr />
 </div>
 </div>
-<div id="bonus-question-10-points" class="section level3">
-<h3>BONUS Question (10 points)</h3>
+<div id="bonus-did-vs-its-comparison-10-points" class="section level3">
+<h3>Bonus: DID vs ITS Comparison (10 points)</h3>
 <div id="bq-why-does-the-did-model-report-a-smaller-program-impact-a3-than-the-its-immediate-effect-b2-10-points" class="section level4">
 <h4>BQ: Why does the DID model report a smaller program impact (a3) than
 the ITS immediate effect (b2)? (10 points)</h4>
@@ -2655,20 +2648,20 @@ link.</li>
 </ol>
 <p><strong>Remember to:</strong></p>
 <ul>
-<li>Include your name as the author in the YAML header</li>
+<li>Include your name as the author in the YAML header.</li>
 <li>Name your files according to the convention:
-<code>Lab-##-LastName.Rmd</code></li>
-<li>Show your solution and include your code</li>
-<li>Format your regression tables using <code>stargazer</code></li>
-<li><strong>Bold your answers</strong></li>
+<code>Lab-##-LastName.Rmd</code>.</li>
+<li>Show your solution and include your code.</li>
+<li>Format your regression tables using <code>stargazer</code>.</li>
+<li><strong>Bold your answers.</strong></li>
 <li>Do <strong>NOT</strong> print excessive output (like a full data
-set)</li>
+set).</li>
 <li>Follow appropriate style guidelines (spaces between arguments,
-etc.)</li>
+etc.).</li>
 </ul>
-<p><em>Note: Platforms like Canvas sometimes disallow HTML file
-submissions when there is embedded computer code. If this happens,
-create a zipped folder with both the RMD and HTML files.</em></p>
+<p><em>Note: Canvas sometimes disallows HTML file submissions when there
+is embedded computer code. If this happens, create a zipped folder with
+both the RMD and HTML files.</em></p>
 <pre><code>ds4ps
 Prog Eval for
 Public Service
@@ -2677,10 +2670,10 @@ PE4PS
 Labs designed by Federica Fusi &amp; Jesse Lecy
 Source code is available on GitHub
 
-Creative Common License:
+Creative Commons License:
 (CC BY-NC-SA 4.0)
 
-CPP 525 Foundations of Program Eval III
+PAF 512 - Advanced Regression
 Part of the MS in Evaluation and Analytics
 @ Arizona State University
 

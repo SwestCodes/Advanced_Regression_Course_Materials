@@ -1869,20 +1869,13 @@ interventions using a different dataset with monthly observations.</p>
 URL2 &lt;- &quot;https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/labs/DATA/time-series-diff-n-diff-comparison.csv&quot;
 dat &lt;- read.csv(URL2, stringsAsFactors = FALSE)
 rbind(head(dat, 3), tail(dat, 3))</code></pre>
-<pre><code>##      nhood quadrant   group month year time treat post.treat time.since crimes
-## 1    NH-01      Q-A   treat     1 1994    1     1          0          0    107
-## 2    NH-01      Q-B control     1 1994    1     0          0          0     96
-## 3    NH-01      Q-C   treat     1 1994    1     1          0          0     92
-## 1246 NH-04      Q-X control    12 1997   48     0          1         24    192
-## 1247 NH-04      Q-Y   treat    12 1997   48     1          1         24    214
-## 1248 NH-04      Q-Z control    12 1997   48     0          1         24    196
-##      treat.x.post
-## 1               0
-## 2               0
-## 3               0
-## 1246            0
-## 1247            1
-## 1248            0</code></pre>
+<pre><code>##      nhood quadrant   group month year time treat post.treat time.since crimes treat.x.post
+## 1    NH-01      Q-A   treat     1 1994    1     1          0          0    107            0
+## 2    NH-01      Q-B control     1 1994    1     0          0          0     96            0
+## 3    NH-01      Q-C   treat     1 1994    1     1          0          0     92            0
+## 1246 NH-04      Q-X control    12 1997   48     0          1         24    192            0
+## 1247 NH-04      Q-Y   treat    12 1997   48     1          1         24    214            1
+## 1248 NH-04      Q-Z control    12 1997   48     0          1         24    196            0</code></pre>
 <p>This dataset contains 48 months of data. The vacant lot clean-up
 occurred between months 24 and 25.</p>
 <div id="visualize-the-data" class="section level4">

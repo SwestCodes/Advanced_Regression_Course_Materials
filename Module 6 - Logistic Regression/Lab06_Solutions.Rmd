@@ -128,7 +128,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 ## Instructions
 
-There are **4 sets of questions** to be answered, plus a bonus question. You can earn up to **100 points + 10 bonus points**. Points are indicated next to each question.
+There are **4 sets of questions** to be answered. You can earn up to **100 points + 10 bonus points**. Points are indicated next to each question.
 
 Remember to:
 
@@ -269,7 +269,7 @@ LPM <- lm(Adoption ~ Democrats_s + Evangelics_s + Catholics_s + Media + Merck, d
 
 stargazer(LPM,
           type = "html",
-          ##type = "text",
+          #type = "text",
           title = "Linear Probability Model: HPV Vaccine Legislation Adoption",
           dep.var.labels = "Adoption",
           intercept.bottom = FALSE,
@@ -595,7 +595,7 @@ rbind(summary(me_media_200), summary(me_media_400))
 
 ---
 
-### BONUS: LPM vs. Logit Out-of-Bound Predictions (10 points)
+### Bonus: LPM vs. Logit Out-of-Bound Predictions (10 points)
 
 #### BQ1a: Using your LPM model from Q1, calculate the predicted probability of adoption for a state with the following profile: Democrats = 90, Evangelic = 5, Catholics = 5, Media = 50, Merck = 5000. Now calculate the predicted probability using your logit model from Q2 for the same state. What do you notice about the LPM prediction? Why is this problematic, and how does the logit model solve it? (10 points)
 
@@ -637,14 +637,14 @@ When you have completed your assignment, knit your RMD file to generate your ren
 **Remember to:**
 
 * Include your name as the author in the YAML header.
-* Name your files according to the convention: `Lab-06-LastName.Rmd`.
+* Name your files according to the convention: `Lab-##-LastName.Rmd`.
 * Show your solution and include your code.
 * Format your regression tables using `stargazer`.
 * **Bold your answers.**
 * Do **NOT** print excessive output (like a full data set).
 * Follow appropriate style guidelines (spaces between arguments, etc.).
 
-*Note: Platforms like BlackBoard and Canvas sometimes disallow you from submitting HTML files when there is embedded computer code. If this happens, create a zipped folder with both the RMD and HTML files.*
+*Note: Canvas sometimes disallows HTML file submissions when there is embedded computer code. If this happens, create a zipped folder with both the RMD and HTML files.*
 
 ```
 ds4ps
@@ -655,10 +655,10 @@ PE4PS
 Labs designed by Federica Fusi & Jesse Lecy
 Source code is available on GitHub
 
-Creative Common License:
+Creative Commons License:
 (CC BY-NC-SA 4.0)
 
-CPP 525 Foundations of Program Eval III
+PAF 512 - Advanced Regression
 Part of the MS in Evaluation and Analytics
 @ Arizona State University
 

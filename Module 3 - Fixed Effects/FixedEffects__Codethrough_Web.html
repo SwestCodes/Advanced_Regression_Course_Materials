@@ -1892,20 +1892,13 @@ wagepan %&gt;%
 <h2>Key Variables</h2>
 <pre class="r"><code># Summary statistics
 summary(wagepan[, c(&quot;lwage&quot;, &quot;union&quot;, &quot;married&quot;, &quot;educ&quot;, &quot;black&quot;, &quot;exper&quot;)])</code></pre>
-<pre><code>##      lwage            union          married           educ      
-##  Min.   :-3.579   Min.   :0.000   Min.   :0.000   Min.   : 3.00  
-##  1st Qu.: 1.351   1st Qu.:0.000   1st Qu.:0.000   1st Qu.:11.00  
-##  Median : 1.671   Median :0.000   Median :0.000   Median :12.00  
-##  Mean   : 1.649   Mean   :0.244   Mean   :0.439   Mean   :11.77  
-##  3rd Qu.: 1.991   3rd Qu.:0.000   3rd Qu.:1.000   3rd Qu.:12.00  
-##  Max.   : 4.052   Max.   :1.000   Max.   :1.000   Max.   :16.00  
-##      black            exper       
-##  Min.   :0.0000   Min.   : 0.000  
-##  1st Qu.:0.0000   1st Qu.: 4.000  
-##  Median :0.0000   Median : 6.000  
-##  Mean   :0.1156   Mean   : 6.515  
-##  3rd Qu.:0.0000   3rd Qu.: 9.000  
-##  Max.   :1.0000   Max.   :18.000</code></pre>
+<pre><code>##      lwage            union          married           educ           black            exper       
+##  Min.   :-3.579   Min.   :0.000   Min.   :0.000   Min.   : 3.00   Min.   :0.0000   Min.   : 0.000  
+##  1st Qu.: 1.351   1st Qu.:0.000   1st Qu.:0.000   1st Qu.:11.00   1st Qu.:0.0000   1st Qu.: 4.000  
+##  Median : 1.671   Median :0.000   Median :0.000   Median :12.00   Median :0.0000   Median : 6.000  
+##  Mean   : 1.649   Mean   :0.244   Mean   :0.439   Mean   :11.77   Mean   :0.1156   Mean   : 6.515  
+##  3rd Qu.: 1.991   3rd Qu.:0.000   3rd Qu.:1.000   3rd Qu.:12.00   3rd Qu.:0.0000   3rd Qu.: 9.000  
+##  Max.   : 4.052   Max.   :1.000   Max.   :1.000   Max.   :16.00   Max.   :1.0000   Max.   :18.000</code></pre>
 <strong>Variable Descriptions:</strong>
 <div class="tbl-fixed">
 <table>
@@ -3140,10 +3133,8 @@ individual_effects &lt;- fixef(fe_plm)
 
 # Show first 10
 head(individual_effects, 10)</code></pre>
-<pre><code>##        13        17        18        45       110       120       126       150 
-## 0.9757757 1.1887822 1.5243444 1.4158164 1.5052647 1.1038344 1.6419173 0.7236125 
-##       162       166 
-## 1.1326952 0.9965791</code></pre>
+<pre><code>##        13        17        18        45       110       120       126       150       162       166 
+## 0.9757757 1.1887822 1.5243444 1.4158164 1.5052647 1.1038344 1.6419173 0.7236125 1.1326952 0.9965791</code></pre>
 <pre class="r"><code># Summary of the distribution of individual effects
 summary(as.numeric(individual_effects))</code></pre>
 <pre><code>##     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 

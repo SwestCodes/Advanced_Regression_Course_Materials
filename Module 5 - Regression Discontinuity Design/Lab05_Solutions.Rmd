@@ -127,12 +127,13 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 ## Instructions
 
-There are **5 sets of questions** to be answered, plus bonus questions. You can earn up to **100 points + 10 bonus points**. Points are indicated next to each question.
+There are **5 sets of questions** to be answered. You can earn up to **100 points + 10 bonus points**. Points are indicated next to each question.
 
 Remember to:
 
 - With the exception of `rdrobust()` models, format your tables using `stargazer`
-- Submit the R markdown file & HTML with all your codes
+- Answer all parts of each question
+- Submit the R markdown file & HTML with all your code
 - **Bold your answers**
 
 ---
@@ -541,7 +542,7 @@ abline(v = 60, col = "red", lwd = 2, lty = 2)
 
 ---
 
-### Bonus Question 1: Bandwidth Sensitivity Analysis (5 points)
+### Bonus: Bandwidth Sensitivity Analysis (10 points)
 
 In the codethrough, we learned that `rdrobust()` automatically selects an optimal bandwidth. However, a robust finding should not depend entirely on one specific bandwidth choice.
 
@@ -611,7 +612,7 @@ When you have completed your assignment, knit your RMD file to generate your ren
 * Do **NOT** print excessive output (like a full data set).
 * Follow appropriate style guidelines (spaces between arguments, etc.).
 
-*Note: Platforms like BlackBoard and Canvas sometimes disallow you from submitting HTML files when there is embedded computer code. If this happens, create a zipped folder with both the RMD and HTML files.*
+*Note: Canvas sometimes disallows HTML file submissions when there is embedded computer code. If this happens, create a zipped folder with both the RMD and HTML files.*
 
 ```
 ds4ps
@@ -622,10 +623,10 @@ PE4PS
 Labs designed by Federica Fusi & Jesse Lecy
 Source code is available on GitHub
 
-Creative Common License:
+Creative Commons License:
 (CC BY-NC-SA 4.0)
 
-CPP 525 Foundations of Program Eval III
+PAF 512 - Advanced Regression
 Part of the MS in Evaluation and Analytics
 @ Arizona State University
 
