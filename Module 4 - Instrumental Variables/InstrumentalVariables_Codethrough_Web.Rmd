@@ -296,7 +296,7 @@ stargazer(naive_model,
 <div class="instructor-note">
 **Instructor's Note:**
 
-Technically speaking, when working with logged values, the correct way to interpret the value is to exponentiate the coefficient and subtract $1$, then multiply by $100$ ($100 \cdot (e^\beta - 1$). For our purposes, and given our coefficients are small, we can approximate the % change directly. For larger coefficients or in a real analysis, use the exact formula. Try it on your own and see what the difference is.
+Technically speaking, when working with logged values, the correct way to interpret the value is to exponentiate the coefficient and subtract $1$, then multiply by $100$ ($100 \cdot (e^\beta - 1)$. For our purposes, and given our coefficients are small, we can approximate the % change directly. For larger coefficients or in a real analysis, use the exact formula. Try it on your own and see what the difference is.
 
 </div>
 
@@ -497,7 +497,7 @@ Both parents' education levels show clear and statistically significant positive
 
 We cannot directly test exogeneity or the exclusion restriction, but we can argue for them:
 
-**Exogeneity argument:** A parent's education level was determined by their own circumstances decades earlier. There's no reason to think it would be correlated with their daughter's innate cognitive ability, motivation, or other unobserved traits that affect wages.
+**Exogeneity argument:** A parents education level was determined by their own circumstances decades earlier. There's no reason to think it would be correlated with their daughter's innate cognitive ability, motivation, or other unobserved traits that affect wages.
 
 **Exclusion restriction argument:** Employers don't know (or care about) your parents' education when setting wages. The only way a parent's education could affect your wages is by influencing how much education YOU got.
 

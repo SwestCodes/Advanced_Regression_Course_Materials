@@ -147,7 +147,7 @@ Summer school programs are designed to help students who have not yet achieved t
 
 Students that scored below 60 on the 8th grade standardized math exam were required to attend summer school before 9th grade. Students scoring 60 or above were not required to attend.
 
-> **Note:** As we learned in the codethrough, checking whether the cutoff was adhered to is an important first step in deliniating between Fuzzy vs. Sharp design. In the case of this dataset, the design was sharp - no students that scored above 59 attended summer school and all students that scored below 60 did.
+> **Note:** As we learned in the codethrough, checking whether the cutoff was adhered to is an important first step in delineating between Fuzzy vs. Sharp design. In the case of this dataset, the design was sharp - no students that scored above 59 attended summer school and all students that scored below 60 did.
 
 ---
 
@@ -169,11 +169,9 @@ The dataset contains observations on 1,000 high school students. Variables inclu
 ```{r}
 # Install packages if needed
 # install.packages("stargazer")
-# install.packages("dplyr")
 # install.packages("rdrobust")
 
 library(stargazer) # nice tables
-library(dplyr) # data wrangling
 library(rdrobust) # RDD Gold Standard
 ```
 
@@ -378,7 +376,7 @@ The power of RDD is that it lets us estimate what *would have happened* to treat
 
 In the codethrough, we learned that `rdrobust()` automatically selects an optimal bandwidth. However, a robust finding should not depend entirely on one specific bandwidth choice.
 
-#### BQ1a: Run two additional `rdrobust()` models: one using half the optimal bandwidth and one using double the optimal bandwidth. Report the treatment effects and p-values for all three models (Half, Optimal, Double). (10 points)
+#### BQ1a: Run two additional `rdrobust()` models: one using half the optimal bandwidth and one using double the optimal bandwidth. Report the treatment effects and p-values for all three models (Half, Optimal, Double). (8 points)
 
 > **Hint:** You can extract the optimal bandwidth from your model in Q3c using `rd_model$bws[1, 1]`. Use the argument `h = ...` to set a manual bandwidth. Use `coef[1]` for the treatment effect estimate.
 

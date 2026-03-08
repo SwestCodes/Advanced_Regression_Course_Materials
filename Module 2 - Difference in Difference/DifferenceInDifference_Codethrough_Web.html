@@ -2238,10 +2238,10 @@ b3 &lt;- coef(DID_model)[4]  # Group x Post
 
 # Create a comprehensive summary table
 coef_summary &lt;- data.frame(
-  Coefficient = c(&quot;$\\beta_0$&quot;,
-  &quot;$\\beta_0 + \\beta_2$&quot;,
-  &quot;$\\beta_0 + \\beta_1$&quot;,
-  &quot;$\\beta_0 + \\beta_1 + \\beta_2 + \\beta_3$&quot;),
+  Coefficient = c(&quot;B0&quot;,
+  &quot;B1&quot;,
+  &quot;B2&quot;,
+  &quot;B3&quot;),
   Value = round(c(b0, b1, b2, b3), 2),
   Interpretation = c(
     &quot;Control group mean before treatment&quot;,
@@ -2257,18 +2257,14 @@ Hypothesis = c(
   )
 
 coef_summary</code></pre>
-<pre><code>                                        Coefficient Value</code></pre>
-<p>(Intercept) <span class="math inline">\(\\beta_0\)</span> 12.06 Group
-<span class="math inline">\(\\beta_0 + \\beta_2\)</span> -3.73 Post
-<span class="math inline">\(\\beta_0 + \\beta_1\)</span> 3.41 Group_Post
-<span class="math inline">\(\\beta_0 + \\beta_1 + \\beta_2 +
-\\beta_3\)</span> -2.17 Interpretation (Intercept) Control group mean
-before treatment Group Difference between groups before treatment Post
-Change in control group over time (secular trend) Group_Post Additional
-change in treatment group (treatment effect) Hypothesis (Intercept) Is
-control pre-treatment mean ≠ 0? Group Did groups differ before
-treatment? Post Did control group change over time? Group_Post Did
-treatment have an effect?</p>
+<pre><code>        Coefficient Value</code></pre>
+<p>(Intercept) B0 12.06 Group B1 -3.73 Post B2 3.41 Group_Post B3 -2.17
+Interpretation (Intercept) Control group mean before treatment Group
+Difference between groups before treatment Post Change in control group
+over time (secular trend) Group_Post Additional change in treatment
+group (treatment effect) Hypothesis (Intercept) Is control pre-treatment
+mean ≠ 0? Group Did groups differ before treatment? Post Did control
+group change over time? Group_Post Did treatment have an effect?</p>
 <hr style="border: 2px solid #FFC627; width: 90%;">
 </div>
 <div id="group-means-from-coefficients" class="section level2">

@@ -175,11 +175,9 @@ head(data)
 # Install/Load Packages
 # install.packages("stargazer") 
 # install.packages("dplyr")
-# install.packages("knitr")
-library(wooldridge)   # Contains the injury dataset
+
 library(stargazer)    # Clean regression tables
 library(dplyr)        # Data manipulation
-library(knitr)        # kable function for tables and inline code
 ```
 
 ---
@@ -355,6 +353,8 @@ abline(v = 24.5, lty = 3, col = "gray", lwd = 3)
 legend("topleft", legend = c("Control", "Treatment"), 
        col = c("steelblue", "firebrick"), pch = 19, lty = 1)
 ```
+
+
 ```{r}
 ts1 <- 
   dat %>% 

@@ -296,7 +296,7 @@ stargazer(naive_model,
 <div class="instructor-note">
 **Instructor's Note:**
 
-Technically speaking, when working with logged values, the correct way to interpret the value is to exponentiate the coefficient and subtract $1$, then multiply by $100$ ($100 \cdot (e^\beta - 1$). For our purposes, and given our coefficients are small, we can approximate the % change directly. For larger coefficients or in a real analysis, use the exact formula. Try it on your own and see what the difference is.
+Technically speaking, when working with logged values, the correct way to interpret the value is to exponentiate the coefficient and subtract $1$, then multiply by $100$ ($100 \cdot (e^\beta - 1)$. For our purposes, and given our coefficients are small, we can approximate the % change directly. For larger coefficients or in a real analysis, use the exact formula. Try it on your own and see what the difference is.
 
 </div>
 
@@ -366,7 +366,7 @@ We have two potential instruments in the data:
 
 **Relevance (Criterion 1):** Children of more educated parents tend to get more education themselves - through encouragement, resources, expectations, and role modeling.
 
-**Exogeneity (Criterion 2):** A parent's education was determined decades before their child entered the labor market. It shouldn't be correlated with the child's innate ability (conditional on other factors).
+**Exogeneity (Criterion 2):** A parents education was determined decades before their child entered the labor market. It shouldn't be correlated with the child's innate ability (conditional on other factors).
 
 **Exclusion Restriction (Criterion 3):** Why would an employer pay you more because your father went to college? The only plausible pathway from father's education to your wages is through YOUR education.
 

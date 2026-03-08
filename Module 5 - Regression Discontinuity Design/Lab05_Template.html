@@ -1692,7 +1692,7 @@ were required to attend summer school before 9th grade. Students scoring
 <blockquote>
 <p><strong>Note:</strong> As we learned in the codethrough, checking
 whether the cutoff was adhered to is an important first step in
-deliniating between Fuzzy vs. Sharp design. In the case of this dataset,
+delineating between Fuzzy vs. Sharp design. In the case of this dataset,
 the design was sharp - no students that scored above 59 attended summer
 school and all students that scored below 60 did.</p>
 </blockquote>
@@ -1737,11 +1737,9 @@ Variables include:</p>
 <h3>Load Packages</h3>
 <pre class="r"><code># Install packages if needed
 # install.packages(&quot;stargazer&quot;)
-# install.packages(&quot;dplyr&quot;)
 # install.packages(&quot;rdrobust&quot;)
 
 library(stargazer) # nice tables
-library(dplyr) # data wrangling
 library(rdrobust) # RDD Gold Standard</code></pre>
 </div>
 <div id="load-data" class="section level3">
@@ -1972,11 +1970,11 @@ points)</h4>
 <p>In the codethrough, we learned that <code>rdrobust()</code>
 automatically selects an optimal bandwidth. However, a robust finding
 should not depend entirely on one specific bandwidth choice.</p>
-<div id="bq1a-run-two-additional-rdrobust-models-one-using-half-the-optimal-bandwidth-and-one-using-double-the-optimal-bandwidth.-report-the-treatment-effects-and-p-values-for-all-three-models-half-optimal-double.-10-points" class="section level4">
+<div id="bq1a-run-two-additional-rdrobust-models-one-using-half-the-optimal-bandwidth-and-one-using-double-the-optimal-bandwidth.-report-the-treatment-effects-and-p-values-for-all-three-models-half-optimal-double.-8-points" class="section level4">
 <h4>BQ1a: Run two additional <code>rdrobust()</code> models: one using
 half the optimal bandwidth and one using double the optimal bandwidth.
 Report the treatment effects and p-values for all three models (Half,
-Optimal, Double). (10 points)</h4>
+Optimal, Double). (8 points)</h4>
 <blockquote>
 <p><strong>Hint:</strong> You can extract the optimal bandwidth from
 your model in Q3c using <code>rd_model$bws[1, 1]</code>. Use the

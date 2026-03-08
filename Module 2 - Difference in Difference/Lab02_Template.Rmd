@@ -175,11 +175,9 @@ head(data)
 # Install/Load Packages
 # install.packages("stargazer") 
 # install.packages("dplyr")
-# install.packages("knitr")
-library(wooldridge)   # Contains the injury dataset
+
 library(stargazer)    # Clean regression tables
 library(dplyr)        # Data manipulation
-library(knitr)        # kable function for tables and inline code
 ```
 
 ---
@@ -314,6 +312,8 @@ abline(v = 24.5, lty = 3, col = "gray", lwd = 3)
 legend("topleft", legend = c("Control", "Treatment"), 
        col = c("steelblue", "firebrick"), pch = 19, lty = 1)
 ```
+
+
 ```{r}
 ts1 <- 
   dat %>% 
@@ -386,7 +386,7 @@ legend("topleft", legend = c("Control", "Treatment"),
        col = c("steelblue", "firebrick"), pch = 19, lty = 1)
 ```
 
-```{r}
+```{r, results = 'asis'}
 # Diff-in-Diff Model
 m1 <- lm(crimes ~ treat + post.treat + treat.x.post, data = dat)
 
@@ -421,7 +421,7 @@ abline( v=24.5, lty=3, col="gray", lwd=3 )
 points( d2$time, m2$fitted.values, pch=19, type="l", lwd=3 )
 ```
 
-```{r}
+```{r, results = 'asis' }
 # Time Series Model
 d2 <- filter(dat, group == "treat")
 m2 <- lm(crimes ~ time + post.treat + time.since, data = d2)

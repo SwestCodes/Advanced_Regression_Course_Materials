@@ -1684,7 +1684,7 @@ Kirkpatrick (2013) entitled “Giving Girls a Shot: An Examination of
 Mandatory Vaccination Legislation” and published in <em>Policy Studies
 Journal</em>, 41(2), 295-318.</p>
 <blockquote>
-<p><strong>Research Question:</strong> What factors influence a state’s
+<p><strong>Research Question:</strong> What factors influence a states
 decision to introduce mandatory HPV vaccine legislation for young
 girls?</p>
 </blockquote>
@@ -1697,17 +1697,17 @@ public-health determinants on states’ decision making.</p>
 <p>With regards to morality, they suggest that state politicians are
 responsive to the public opinion within their own state, such that they
 will respond to positive or negative approval of the new legislation.
-For instance, a high proportion of Evangelics or Catholics within the
+For instance, a high proportion of Evangelicals or Catholics within the
 state might discourage mandatory HPV vaccine legislation as those groups
 have conservative view regarding sexuality and sexual activity and might
-disapprove the vaccine at such early age. Similarly, a high rate of
+disapprove of the vaccine at such early age. Similarly, a high rate of
 negative media attention might decrease politicians’ motivation to
 introduce legislation mandating the HPV vaccine in order to remain
 aligned with the electorate’s preferences.</p>
 <p>By contrast, we could expect politicians to support their party’s
 values. “Social welfare” is generally an issue associated with
 Democrats, which might have greater incentives to pass a mandatory HPV
-vaccine regulation to appeal their electoral basis as compared to
+vaccine regulation to appeal to their electoral basis as compared to
 Republicans.</p>
 <p>Finally, politicians might respond to political interests and support
 policies in favor of private organizations providing resources for their
@@ -1766,9 +1766,9 @@ head(data)</code></pre>
 <blockquote>
 <p><strong>Note: Important Data Scaling Issue</strong></p>
 <p>In this dataset, <strong>Democrats</strong>,
-<strong>Evangelics</strong>, and <strong>Catholics</strong> are recorded
-as decimals between 0 and 1 (0.50), and represent the proportion of the
-population in each respective group.</p>
+<strong>Evangelicals</strong>, and <strong>Catholics</strong> are
+recorded as decimals between 0 and 1 (0.50), and represent the
+proportion of the population in each respective group.</p>
 <p><strong>The Problem:</strong> A “1-unit increase” in these variables
 means going from 0 to 1, which represents going from 0% to 100% of the
 population. That’s unrealistic - we care about smaller changes like
@@ -1988,8 +1988,8 @@ variable and the coefficients from your logit model. Do not use
 <code>predict()</code> for this question.</p>
 </blockquote>
 <p><span class="math display">\[
-P = \frac{1}{1 + e^{-(\beta_0 + \beta_1 X_1 + \beta_2 X_2 + \beta_3
-X_3)}} \tag{3.1}
+P = \frac{1}{1 + e^{-(\beta_0 + \beta_1 X_1 + \beta_2 X_2 + \beta_3 X_3
++ \cdots)}} \tag{3.1}
 \]</span></p>
 <pre class="r"><code># Your Code Here</code></pre>
 <p><strong>Type your answer here, within the asterisks</strong></p>
@@ -2027,6 +2027,11 @@ error.</p>
 <h4>Q3e: Create a plot showing how the predicted probability of adoption
 changes as the percentage of Evangelicals ranges from 0 to 100. Hold all
 other variables at their means. (5 points)</h4>
+<blockquote>
+<p><strong>Note: </strong> Be cognisant of the fact that our Evangelic
+variable is pre-scaled, so it ranges from 0 to 100, not 0 to 1. Make
+sure your x-axis reflects this.</p>
+</blockquote>
 <pre class="r"><code># Your Code Here</code></pre>
 <p><strong>Type your answer here, within the asterisks</strong></p>
 <hr />

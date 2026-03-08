@@ -186,7 +186,6 @@ Data were collected across multiple cities in the US. The study population inclu
 library(stargazer)    # Clean regression tables
 library(AER)          # ivreg() for instrumental variables
 library(dplyr)        # Data manipulation
-library(knitr)        # Tables
 library(corrplot)     # Correlation visualization
 ```
 
@@ -335,7 +334,7 @@ for (i in 1:(n - 1)) {
 
 - **Relevance:** We can test this by examining the correlation between each potential instrument and the policy variable (PublicHousing). A statistically significant correlation indicates the instrument is relevant.
 
-- **Exogeneity:** In this teaching dataset, we can identify whether the potential instrument and the omitted variable (HealthBehavior) are correlated - to pass, the must not be. In practice (the real world), we cannot test this because the omitted variable is unobserved - hence "omitted."
+- **Exogeneity:** In this teaching dataset, we can identify whether the potential instrument and the omitted variable (HealthBehavior) are correlated - to pass, they must not be. In practice (the real world), we cannot test this because the omitted variable is unobserved - hence "omitted."
 
 **Must Be Argued Theoretically:**
 
@@ -350,7 +349,7 @@ for (i in 1:(n - 1)) {
 - **Relevance:** The correlation between `Supply` and `PublicHousing` is $0.11$, which is weak, but significant. **PASSES** the relevance criterion (weak instrument).
 - **Exogeneity:** The correlation between `Supply` and `HealthBehavior` is $0.01$, which is essentially zero. **PASSES** the exogeneity criterion.
 - **Exclusion Restriction:** Theoretically, the supply of public housing in a city affects how long someone stays in public housing (through availability), but should not directly affect individual health status. **Potentially PASSES** by theory.
-- **Overall Assessment:** `Supply` passes the three criterion, making it a **POTENTIALLY VALID instrument**.
+- **Overall Assessment:** `Supply` passes the three criteria, making it a **POTENTIALLY VALID instrument**.
 
 **2. ParentsHealthStatus (Health status of parents)**
 
@@ -375,7 +374,7 @@ for (i in 1:(n - 1)) {
 
 #### Q4c: Based on your analysis in Q4b, which variable(s) appear to be valid instruments? Justify your answer. (5 points)
 
-**Based on the analysis above, `WaitingTime` and `Supply` are the only valid instruments.They are the only variables that are:**
+**Based on the analysis above, `WaitingTime` and `Supply` are the only valid instruments. They are the only variables that are:**
 
 1. **Significantly correlated with `PublicHousing`**
 2. **Are uncorrelated with the omitted variable `HealthBehavior`** 

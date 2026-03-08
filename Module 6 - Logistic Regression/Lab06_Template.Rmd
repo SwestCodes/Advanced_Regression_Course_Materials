@@ -143,13 +143,13 @@ Remember to:
 
 This lab is loosely based on the research conducted by Doan & Kirkpatrick (2013) entitled "Giving Girls a Shot: An Examination of Mandatory Vaccination Legislation" and published in *Policy Studies Journal*, 41(2), 295-318.
 
-> **Research Question:** What factors influence a state's decision to introduce mandatory HPV vaccine legislation for young girls?
+> **Research Question:** What factors influence a states decision to introduce mandatory HPV vaccine legislation for young girls?
 
 Doan and Kirkpatrick (2013) analyze state's decision to introduce a mandatory vaccine for the human papillomavirus (HPV) for all fifth- and sixth-grade girls in public schools. The vaccine was approved in 2006 and patented by Merck & Co. The two researchers were particularly interested in the influence of competing morality, economic, and public-health determinants on states' decision making.
 
-With regards to morality, they suggest that state politicians are responsive to the public opinion within their own state, such that they will respond to positive or negative approval of the new legislation. For instance, a high proportion of Evangelics or Catholics within the state might discourage mandatory HPV vaccine legislation as those groups have conservative view regarding sexuality and sexual activity and might disapprove the vaccine at such early age. Similarly, a high rate of negative media attention might decrease politicians' motivation to introduce legislation mandating the HPV vaccine in order to remain aligned with the electorate's preferences.
+With regards to morality, they suggest that state politicians are responsive to the public opinion within their own state, such that they will respond to positive or negative approval of the new legislation. For instance, a high proportion of Evangelicals or Catholics within the state might discourage mandatory HPV vaccine legislation as those groups have conservative view regarding sexuality and sexual activity and might disapprove of the vaccine at such early age. Similarly, a high rate of negative media attention might decrease politicians' motivation to introduce legislation mandating the HPV vaccine in order to remain aligned with the electorate's preferences.
 
-By contrast, we could expect politicians to support their party's values. "Social welfare" is generally an issue associated with Democrats, which might have greater incentives to pass a mandatory HPV vaccine regulation to appeal their electoral basis as compared to Republicans.
+By contrast, we could expect politicians to support their party's values. "Social welfare" is generally an issue associated with Democrats, which might have greater incentives to pass a mandatory HPV vaccine regulation to appeal to their electoral basis as compared to Republicans.
 
 Finally, politicians might respond to political interests and support policies in favor of private organizations providing resources for their electoral campaign. We might expect that states where politicians receive more money from Merck & Co will be more likely to adopt such legislation.
 
@@ -193,7 +193,7 @@ head(data)
 ### Pre-Scale Proportion Variables in Decimal Form
 > **Note: Important Data Scaling Issue**
 >
-> In this dataset, **Democrats**, **Evangelics**, and **Catholics** are recorded as decimals between 0 and 1 (0.50), and represent the proportion of the population in each respective group.
+> In this dataset, **Democrats**, **Evangelicals**, and **Catholics** are recorded as decimals between 0 and 1 (0.50), and represent the proportion of the population in each respective group.
 >
 > **The Problem:** A "1-unit increase" in these variables means going from 0 to 1, which represents going from 0% to 100% of the population. That's unrealistic - we care about smaller changes like going from 30% to 31% so our results are more meaningful and interpretable.
 >
@@ -333,7 +333,7 @@ data$Catholics <- NULL
 > **Note:** Plug in the raw mean of each independent variable and the coefficients from your logit model. Do not use `predict()` for this question.
 
 $$
-P = \frac{1}{1 + e^{-(\beta_0 + \beta_1 X_1 + \beta_2 X_2 + \beta_3 X_3)}} \tag{3.1}
+P = \frac{1}{1 + e^{-(\beta_0 + \beta_1 X_1 + \beta_2 X_2 + \beta_3 X_3 + \cdots)}} \tag{3.1}
 $$
 
 ```{r}
@@ -362,6 +362,7 @@ $$
 **Type your answer here, within the asterisks**
 
 #### Q3e: Create a plot showing how the predicted probability of adoption changes as the percentage of Evangelicals ranges from 0 to 100. Hold all other variables at their means. (5 points)
+> **Note: ** Be cognisant of the fact that our Evangelic variable is pre-scaled, so it ranges from 0 to 100, not 0 to 1. Make sure your x-axis reflects this. 
 
 ```{r}
 # Your Code Here

@@ -1684,7 +1684,7 @@ Kirkpatrick (2013) entitled “Giving Girls a Shot: An Examination of
 Mandatory Vaccination Legislation” and published in <em>Policy Studies
 Journal</em>, 41(2), 295-318.</p>
 <blockquote>
-<p><strong>Research Question:</strong> What factors influence a state’s
+<p><strong>Research Question:</strong> What factors influence a states
 decision to introduce mandatory HPV vaccine legislation for young
 girls?</p>
 </blockquote>
@@ -1700,14 +1700,14 @@ will respond to positive or negative approval of the new legislation.
 For instance, a high proportion of Evangelics or Catholics within the
 state might discourage mandatory HPV vaccine legislation as those groups
 have conservative view regarding sexuality and sexual activity and might
-disapprove the vaccine at such early age. Similarly, a high rate of
+disapprove of the vaccine at such early age. Similarly, a high rate of
 negative media attention might decrease politicians’ motivation to
 introduce legislation mandating the HPV vaccine in order to remain
 aligned with the electorate’s preferences.</p>
 <p>By contrast, we could expect politicians to support their party’s
 values. “Social welfare” is generally an issue associated with
 Democrats, which might have greater incentives to pass a mandatory HPV
-vaccine regulation to appeal their electoral basis as compared to
+vaccine regulation to appeal to their electoral basis as compared to
 Republicans.</p>
 <p>Finally, politicians might respond to political interests and support
 policies in favor of private organizations providing resources for their
@@ -2905,8 +2905,8 @@ variable and the coefficients from your logit model. Stick with the
 methods shown in the codethrough.</p>
 </blockquote>
 <p><span class="math display">\[
-P = \frac{1}{1 + e^{-(\beta_0 + \beta_1 X_1 + \beta_2 X_2 + \beta_3
-X_3)}} \tag{3.1}
+P = \frac{1}{1 + e^{-(\beta_0 + \beta_1 X_1 + \beta_2 X_2 + \beta_3 X_3
++ \cdots)}} \tag{3.1}
 \]</span></p>
 <pre class="r"><code># Get the means of each variable
 mean_demo &lt;- mean(data$Democrats_s)
@@ -3048,7 +3048,7 @@ sure your x-axis reflects this.</p>
 <pre class="r"><code># Create a data frame with Evangelic varying from 0 to 100 (as proportions 0 to 1)
 plot_data &lt;- data.frame(
   Democrats_s = mean(data$Democrats_s),
-  Evangelics_s = seq(0, 100, by = 1),  # 0 to 1 in increments of 0.01
+  Evangelics_s = seq(0, 100, by = 1),  # 0 to 100 in increments of 1
   Catholics_s = mean(data$Catholics_s),
   Media = mean(data$Media),
   Merck = mean(data$Merck)

@@ -186,7 +186,6 @@ Data were collected across multiple cities in the US. The study population inclu
 library(stargazer)    # Clean regression tables
 library(AER)          # ivreg() for instrumental variables
 library(dplyr)        # Data manipulation
-library(knitr)        # Tables
 library(corrplot)     # Correlation visualization
 ```
 

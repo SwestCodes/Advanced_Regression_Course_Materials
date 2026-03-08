@@ -1785,7 +1785,6 @@ purposes only)</td>
 library(stargazer)    # Clean regression tables
 library(AER)          # ivreg() for instrumental variables
 library(dplyr)        # Data manipulation
-library(knitr)        # Tables
 library(corrplot)     # Correlation visualization</code></pre>
 </div>
 <div id="load-data" class="section level3">
@@ -2772,7 +2771,7 @@ correlation between each potential instrument and the policy variable
 instrument is relevant.</p></li>
 <li><p><strong>Exogeneity:</strong> In this teaching dataset, we can
 identify whether the potential instrument and the omitted variable
-(HealthBehavior) are correlated - to pass, the must not be. In practice
+(HealthBehavior) are correlated - to pass, they must not be. In practice
 (the real world), we cannot test this because the omitted variable is
 unobserved - hence “omitted.”</p></li>
 </ul>
@@ -2811,7 +2810,7 @@ housing (through availability), but should not directly affect
 individual health status. <strong>Potentially PASSES</strong> by
 theory.</li>
 <li><strong>Overall Assessment:</strong> <code>Supply</code> passes the
-three criterion, making it a <strong>POTENTIALLY VALID
+three criteria, making it a <strong>POTENTIALLY VALID
 instrument</strong>.</li>
 </ul>
 <p><strong>2. ParentsHealthStatus (Health status of
@@ -2872,7 +2871,7 @@ instrument</strong>.</li>
 <h4>Q4c: Based on your analysis in Q4b, which variable(s) appear to be
 valid instruments? Justify your answer. (5 points)</h4>
 <p><strong>Based on the analysis above, <code>WaitingTime</code> and
-<code>Supply</code> are the only valid instruments.They are the only
+<code>Supply</code> are the only valid instruments. They are the only
 variables that are:</strong></p>
 <ol style="list-style-type: decimal">
 <li><strong>Significantly correlated with

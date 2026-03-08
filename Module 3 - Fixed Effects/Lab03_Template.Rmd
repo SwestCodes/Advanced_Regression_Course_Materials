@@ -252,6 +252,7 @@ You suspect the pooled OLS results may be biased due to Simpson's Paradox—stat
 ```
 
 #### Q2d: Now run the same fixed effects model using the `plm()` function with `model = "within"`. Present both models (Q2c and Q2d) side-by-side in a single stargazer table. (5 points)
+> **Note:** The `plm()` function is the professional standard for panel data analysis. It produces the same coefficient on taxes but handles the state effects differently in its output.
 
 ```{r, results='asis'}
 # Run fixed effects using plm()

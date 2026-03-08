@@ -2167,14 +2167,29 @@ resolve these? Did the seat belt law actually have an effect?</p>
 </div>
 <div id="adjusting-for-autocorrelation" class="section level3">
 <h3>Adjusting for Autocorrelation</h3>
+<div class="instructor-note">
+<p><strong>Instructor’s Note: Heteroskedasticity</strong></p>
+<p>The <strong>Newey-West method</strong> corrects for both
+<strong>heteroskedasticity</strong> AND/OR
+<strong>autocorrelation</strong> in our data.</p>
+<ul>
+<li><p>If autocorrelation is present (like in this dataset), Newey-West
+adjusts for it.</p></li>
+<li><p>If no autocorrelation exists (like you might see in other
+datasets), but your robust standard errors still differ from your
+original estimates, it means the method must be correcting for
+heteroskedasticity instead.</p></li>
+</ul>
+<p><strong>Remember this for your lab.</strong></p>
+</div>
 <p>In the presence of autocorrelation, our standard errors are biased,
 making our significance tests (p-values) untrustworthy. To refine our
 inference, we can utilize Robust Standard Errors using the
 <strong>Newey-West method</strong>. This method doesn’t change the
-coefficient estimates but adjusts the standard errors to account for the
-autocorrelation, leading to more reliable hypothesis testing. You’ll
-notice our significance levels change while our coefficients remain the
-same.”</p>
+coefficient estimates but adjusts the standard errors to account for
+both autocorrelation and heteroskedasticity (uneven variance in the
+data), leading to more reliable hypothesis testing. You’ll notice our
+significance levels change while our coefficients remain the same.</p>
 <pre class="r"><code># 1. Calculate the &quot;Robust&quot; Standard Errors (Newey-West)
 # This adjusts the SEs and improves inference in the presence of autocorrelation.
 robust_se &lt;- sqrt(diag(NeweyWest(ITS)))
@@ -3267,7 +3282,7 @@ stargazer(ITS, ITS, ITS_Seasonal, ITS_Seasonal,
           type = &quot;html&quot;, # Change to &quot;html&quot; for final knitting
           se = list(NULL, robust_se, NULL, robust_se_seasonal),
           column.labels = c(&quot;Naive Model&quot;, &quot;Naive (Robust SE)&quot;, 
-                            &quot;Seasonality&quot;, &quot;Seasonalilty (Robust SE)&quot;),
+                            &quot;Seasonality&quot;, &quot;Seasonality (Robust SE)&quot;),
           dep.var.labels = &quot;Monthly Driver Deaths&quot;,
           omit.stat = &quot;all&quot;, 
           digits = 2)</code></pre>
@@ -3309,7 +3324,7 @@ Naive (Robust SE)
 Seasonality
 </td>
 <td>
-Seasonalilty (Robust SE)
+Seasonality (Robust SE)
 </td>
 </tr>
 <tr>

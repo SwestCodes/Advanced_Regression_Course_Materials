@@ -574,7 +574,7 @@ summary(as.numeric(individual_effects))
 
 ## Within-Group Effects
 
-The fixed effects coefficient on `union` (≈0.08) tells us:
+The fixed effects coefficient on `union` (~0.08) tells us:
 
 > "When the *same individual* transitions from non-union to union status, their log wage increases by approximately 0.08, or about 8%."
 
@@ -613,7 +613,7 @@ Our union variable is binary (0 or 1), so interpretation is straightforward:
 
 For continuous variables like `exper`:
 
-- The coefficient ~0.11 means each additional year of experience increases wages by about 11%
+- The coefficient ~0.06 means each additional year of experience increases wages by about 6%
 
  <hr style="border: 2px solid #FFC627; width: 90%;">
 

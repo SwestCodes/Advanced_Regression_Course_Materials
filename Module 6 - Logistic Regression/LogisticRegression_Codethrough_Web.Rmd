@@ -475,7 +475,7 @@ In the LPM, coefficients are directly interpretable as changes in probability. F
 
 ## Robust Standard Errors
 
-Recall that **heteroskedasticity** is patterns in our residuals. An assumption required for valid inference is that our **homoskedastic** (i.e., no patterns). Due to the construction of LPM having two outcomes, it is impossible for our model to be random as residuals cluster around two outcomes. As a result, inherent in LPM is the requirement to calculate robust standard errors. 
+Recall that **heteroskedasticity** is patterns in our residuals. An assumption required for valid inference is that our residuals are **homoskedastic** (i.e., no patterns). Due to the construction of LPM having two outcomes, it is impossible for our model to be random as residuals cluster around two outcomes. As a result, inherent in LPM is the requirement to calculate robust standard errors. 
 
 ```{r}
 # Side-by-side plots
@@ -698,7 +698,7 @@ Let's discuss a few of these results.
 
 `workprg` = $1.14$
 
-  - Participating in a work program increases the odds of recidivism by $1.4x$, where $x$ is the unknown baseline. But, the $95\%$ confidence interval crosses $1$, therefore no statistically significant impact of work programs on recidivism.
+  - Participating in a work program increases the odds of recidivism by $1.14x$, where $x$ is the unknown baseline. But, the $95\%$ confidence interval crosses $1$, therefore no statistically significant impact of work programs on recidivism.
   
 `alcohol` = $1.74$
 
@@ -732,7 +732,7 @@ mean_age <- mean(recid$age)
 mean_rules <- mean(recid$rules)
 
 # The "average" person at mean values of all variables
-tibble(mean_workprg, mean_priors, mean_tserved, mean_felon, mean_alcohol, mean_drugs, mean_black, mean_married, mean_educ, mean_age, mean_rules)
+data.frame(mean_workprg, mean_priors, mean_tserved, mean_felon, mean_alcohol, mean_drugs, mean_black, mean_married, mean_educ, mean_age, mean_rules)
 ```
 
 ```{r}
