@@ -180,7 +180,6 @@ Data were collected across multiple cities in the US. The study population inclu
 # install.packages("stargazer")
 # install.packages("AER")
 # install.packages("dplyr")
-# install.packages("knitr")
 # install.packages("corrplot")
 
 library(stargazer)    # Clean regression tables

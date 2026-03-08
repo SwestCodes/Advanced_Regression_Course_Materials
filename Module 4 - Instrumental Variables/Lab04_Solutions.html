@@ -1779,7 +1779,6 @@ purposes only)</td>
 # install.packages(&quot;stargazer&quot;)
 # install.packages(&quot;AER&quot;)
 # install.packages(&quot;dplyr&quot;)
-# install.packages(&quot;knitr&quot;)
 # install.packages(&quot;corrplot&quot;)
 
 library(stargazer)    # Clean regression tables
@@ -1794,20 +1793,27 @@ data &lt;- read.csv(URL, stringsAsFactors = FALSE)
 
 # Preview the data
 head(data)</code></pre>
-<pre><code>##   X PublicHousing HealthStatus   Supply WaitingTime HealthBehavior    Stamp ParentsHealthStatus      Age Race Education
-## 1 1      17.69557     7.373318 4.824089    18.65725       8.704722 182.6034            2.619932 45.31420    4         1
-## 2 2      38.95437    13.160057 6.126558    34.21815      12.840451 224.3674           19.300365 50.37412    4         1
-## 3 3      34.88688    11.428416 5.793093    34.73621      10.934191 234.1428           11.824954 40.98947    3         1
-## 4 4      17.10150     7.057165 6.265462    18.26504       8.095263 242.3071            7.256021 45.55414    3         1
-## 5 5      44.35689    14.637337 4.873442    35.21419      16.327103 206.1173           11.155997 41.09823    1         1
-## 6 6      27.81436    11.293658 4.008222    17.40875      15.442684 208.1609            5.286644 43.35642    3         1
-##   MaritalStatus Race_4 Race_3 Race_1 Race_2 MaritalStatus_3 MaritalStatus_2 MaritalStatus_4 MaritalStatus_1
-## 1             3      1      0      0      0               1               0               0               0
-## 2             2      1      0      0      0               0               1               0               0
-## 3             3      0      1      0      0               1               0               0               0
-## 4             2      0      1      0      0               0               1               0               0
-## 5             4      0      0      1      0               0               0               1               0
-## 6             2      0      1      0      0               0               1               0               0</code></pre>
+<pre><code>##   X PublicHousing HealthStatus   Supply WaitingTime HealthBehavior    Stamp
+## 1 1      17.69557     7.373318 4.824089    18.65725       8.704722 182.6034
+## 2 2      38.95437    13.160057 6.126558    34.21815      12.840451 224.3674
+## 3 3      34.88688    11.428416 5.793093    34.73621      10.934191 234.1428
+## 4 4      17.10150     7.057165 6.265462    18.26504       8.095263 242.3071
+## 5 5      44.35689    14.637337 4.873442    35.21419      16.327103 206.1173
+## 6 6      27.81436    11.293658 4.008222    17.40875      15.442684 208.1609
+##   ParentsHealthStatus      Age Race Education MaritalStatus Race_4 Race_3
+## 1            2.619932 45.31420    4         1             3      1      0
+## 2           19.300365 50.37412    4         1             2      1      0
+## 3           11.824954 40.98947    3         1             3      0      1
+## 4            7.256021 45.55414    3         1             2      0      1
+## 5           11.155997 41.09823    1         1             4      0      0
+## 6            5.286644 43.35642    3         1             2      0      1
+##   Race_1 Race_2 MaritalStatus_3 MaritalStatus_2 MaritalStatus_4 MaritalStatus_1
+## 1      0      0               1               0               0               0
+## 2      0      0               0               1               0               0
+## 3      0      0               1               0               0               0
+## 4      0      0               0               1               0               0
+## 5      1      0               0               0               1               0
+## 6      0      0               0               1               0               0</code></pre>
 <hr />
 </div>
 </div>
