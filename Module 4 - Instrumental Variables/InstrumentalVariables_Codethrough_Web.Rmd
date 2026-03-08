@@ -1,0 +1,752 @@
+---
+title: "Instrumental Variables | Codethrough"
+subtitle: "PAF 512 - Advanced Regression"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    code_folding: show
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+<style>
+  /* --- ASU Theme Elements --- */
+  
+  /* Maroon Headers */
+  h1, h2, h3, h4 {
+    color: #8C1D40 !important;
+  }
+  
+  /* Gold Links */
+  a {
+    color: #D4AF37 !important;
+  }
+  
+/* --- The Instructor Note Box --- */
+  .instructor-note {
+    background-color: #fff8e1 !important; 
+    
+    border-left: 6px solid #8C1D40;
+    color: #2c3e50;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .instructor-note strong {
+    color: #8C1D40;
+    font-size: 1.1em;
+  }
+
+  /* --- Table of Contents Styling --- */
+
+  /* 1. Active State (The section you are currently reading) */
+  .list-group-item.active, 
+  .list-group-item.active:focus, 
+  .list-group-item.active:hover {
+    background-color: #8C1D40 !important;
+    border-color: #8C1D40 !important;
+    color: white !important;
+  }
+
+  /* 2. Level 2 Headers (##) -> GOLD Bar */
+  /* This targets any subheader */
+  .tocify-subheader .list-group-item {
+    background-color: #f9f9f9; 
+    border-left: 4px solid #FFC627 !important; /* ASU Gold */
+    font-size: 0.9em; 
+    color: #555; 
+    padding-left: 15px !important; 
+  }
+
+  /* 3. Level 3 Headers (###) -> MAROON Bar */
+  /* This targets a subheader INSIDE another subheader */
+  .tocify-subheader .tocify-subheader .list-group-item {
+    border-left: 4px solid #8C1D40 !important; /* ASU Maroon */
+    padding-left: 30px !important; /* Double the indentation */
+  }
+
+  /* 4. Hover Effects */
+  .tocify-subheader .list-group-item:hover {
+    background-color: #fffdf2 !important;
+    color: #8C1D40 !important;
+  }
+  /* --- Code Block High Contrast Overrides --- */
+
+  /* 1. The Code Block Container */
+  pre {
+    background-color: #f4f4f4 !important; /* Light grey background */
+    border: 1px solid #ddd !important;     /* Subtle border definition */
+    color: #212529 !important;             /* Force base text to be VERY dark grey */
+    font-weight: 500;                      /* Make text slightly thicker */
+  }
+
+  /* 2. Comments (The most important fix) */
+  /* We target the class '.co' which R uses for comments */
+  code span.co {
+    color: #486a48 !important; /* A dark, readable forest green */
+    font-style: italic;        /* Italicize to differentiate from code */
+    font-weight: normal;       /* Keep comments lighter weight */
+  }
+
+  /* 3. Strings (Text inside quotes) */
+  code span.st {
+    color: #8C1D40 !important; /* Use ASU Maroon for strings! */
+    font-weight: bold;
+  }
+  
+  /* 4. Numbers and Keywords */
+  code span.dv, code span.kw {
+     color: #004d40 !important; /* Dark teal for numbers/logic */
+  }
+</style>
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+
+
+# What Will We Cover?
+
+#### 1. Understanding the Problem: Omitted Variable Bias
+
+- Why OLS fails when important variables are missing
+- The ability bias example
+
+#### 2. The Naive Model
+
+- Run OLS as our baseline
+- Interpret the (biased) coefficient
+
+#### 3. The Instrumental Variables Solution
+
+- What is an instrument?
+- The three criteria: Relevance, Exogeneity, Exclusion Restriction
+- Which criteria can we test? Which require theory?
+
+#### 4. Evaluating Potential Instruments
+
+- Check correlations
+- Argue for validity theoretically
+
+#### 5. Two-Stage Least Squares (2SLS)
+
+- Stage 1: Predict the policy variable using the instrument
+- Check instrument strength (F > 10 rule)
+- Stage 2: Use predicted values to estimate causal effect
+- Why use `ivreg()` instead of manual two-stage
+
+#### 6. Comparing Results: Naive OLS vs. IV
+
+- Side-by-side comparison
+- Understanding the direction of bias
+- Which estimate should we trust?
+
+#### 7. The Final Verdict
+
+- Summary of findings
+- Key takeaways for your lab
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+
+# The Policy Problem
+
+## Research Question
+
+**Does education increase wages?**
+
+We want to know if getting more education causes people to earn higher wages. This seems simple enough—we could just regress wages on education and look at the coefficient. But there's a problem.
+
+## The Problem: Ability Bias
+
+People with higher innate ability tend to:
+
+1. Stay in school longer (more education)
+2. Earn higher wages (regardless of education)
+
+So when we see that educated workers earn more, we can't tell how much is due to education versus how much is due to ability. If we regress wages on education without controlling for ability, our coefficient captures BOTH effects. This is called **ability bias**—a classic example of omitted variable bias.
+
+We can visualize this problem:
+
+```
+                    Ability (Unobserved)
+                    /                  \
+                   /                    \
+                  v                      v
+           Education  ───────────>    Wages
+           (Policy)                  (Outcome)
+```
+
+The key issue: we cannot measure "ability" directly. It includes things like innate intelligence, motivation, work ethic, and other traits that affect both education and wages. Since we can't include it in our model, our estimate of education's effect will be biased.
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+
+# Data
+
+We will use the **mroz** dataset from the `wooldridge` package. This dataset contains information on 753 married women from the 1976 Panel Study of Income Dynamics. We'll focus on women who are in the labor force (i.e., those with observed wages).
+
+## Key Variables
+
+| Variable | Description |
+|----------|-------------|
+| `lwage` | Log of hourly wage (outcome variable) |
+| `educ` | Years of schooling (policy variable) |
+| `exper` | Years of work experience |
+| `expersq` | Experience squared (captures diminishing returns) |
+| `fatheduc` | Father's years of schooling (potential instrument) |
+| `motheduc` | Mother's years of schooling (potential instrument) |
+
+<div class="instructor-note">
+**Instructor's Note:**
+
+**1. Logged Wages:** The outcome variable `lwage` is the natural log of wages. This means our coefficients represent *percentage* changes, not dollar changes. For example, a coefficient of $0.10$ means a 10% increase in wages. This is standard in labor economics, but keep this interpretation in mind when reporting your results.
+
+**2. Experience and Diminishing Returns:**
+The dataset contains both `exper` and `expersq` to control for work experience. 
+
+* The variable `exper` captures the general growth in wages as experience increases.
+
+* The variable `expersq` captures the **diminishing returns** to experience (the idea that each additional year of experience adds less to wages than the previous year).
+
+We need **both** variables in the model to mathematically form the correct quadratic (non-linear) relationship.
+</div>
+
+## Setup and Data Loading
+
+```{r}
+# Install/Load Packages
+# install.packages("wooldridge")
+# install.packages("AER")
+# install.packages("stargazer")
+# install.packages("dplyr")
+# install.packages("corrplot")
+
+library(wooldridge)   # Contains the mroz dataset
+library(AER)          # ivreg() function for IV regression
+library(stargazer)    # Clean regression tables
+library(dplyr)        # Data manipulation
+library(corrplot)
+```
+
+```{r}
+# Load the mroz dataset
+data(mroz)
+
+# Filter to women in the labor force (those with observed wages)
+d <- mroz[mroz$inlf == 1, ]
+
+# Keep only the variables we need
+d <- d[, c("lwage", "educ", "exper", "expersq", "fatheduc", "motheduc")]
+
+# Check sample size
+cat("Sample size:", nrow(d), "working married women\n")
+```
+
+```{r}
+# Preview the data
+head(d)
+```
+
+## Summary Statistics
+
+```{r, results='asis'}
+stargazer(d,
+          #type = "text", 
+          type = "html",
+          title = "Summary Statistics: Working Married Women (1976)",
+          digits = 2,
+          omit.summary.stat = c("p25", "p75"))
+```
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+
+# The Naive Model
+
+Before we try to fix the omitted variable problem, let's see what happens when we ignore it. This "naive" model gives us a baseline for comparison.
+
+## Run the Naive OLS Model
+
+```{r, results='asis'}
+# Naive OLS: Regress log wages on education and controls
+naive_model <- lm(lwage ~ educ + exper + expersq, data = d)
+
+stargazer(naive_model,
+          #type = "text", 
+          type = "html",
+          title = "Naive OLS Model: Returns to Education",
+          dep.var.labels = "Log Hourly Wage",
+          covariate.labels = c("Education (Years)", 
+                               "Experience (Years)", 
+                               "Experience Squared"),
+          omit.stat = c("f", "ser"),
+          digits = 3)
+```
+
+<div class="instructor-note">
+**Instructor's Note:**
+
+Technically speaking, when working with logged values, the correct way to interpret the value is to exponentiate the coefficient and subtract $1$, then multiply by $100$ ($100 \cdot (e^\beta - 1$). For our purposes, and given our coefficients are small, we can approximate the % change directly. For larger coefficients or in a real analysis, use the exact formula. Try it on your own and see what the difference is.
+
+</div>
+
+## Interpret the Naive Model
+
+The coefficient on education is approximately $0.107$. Since our outcome is log wages, this means each additional year of schooling is associated with a **$10.7%$ increase** in hourly wages.
+
+**But can we trust this estimate?**
+
+This coefficient combines:
+
+1. The true causal effect of education on wages
+2. The spurious correlation caused by ability (people with high ability get more education AND earn more)
+
+We expect the naive estimate to be **biased upward** - it makes education look more valuable than it actually is because it's also picking up the effect of ability.
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+
+# The Instrumental Variables Solution
+
+## What is an Instrument?
+
+An **instrumental variable** is a variable that allows us to isolate the causal effect of education on wages by removing the contamination from ability. 
+
+The key idea: if we can find a variable that affects education but is unrelated to ability, we can use it to identify the "clean" variation in education - variation that has nothing to do with ability.
+
+## The Three Criteria for a Valid Instrument
+
+For a variable $Z$ to be a valid instrument for education, it must satisfy three conditions:
+
+### Criterion 1: Relevance
+
+**$Z$ must be correlated with the policy variable (education in this case).**
+
+- If the instrument doesn't predict education, it can't help us.
+- **Can we test this?** YES - we check this empirically in the first stage regression.
+
+### Criterion 2: Exogeneity
+
+**$Z$ must be uncorrelated with the omitted variable (ability).**
+
+- If the instrument is correlated with ability, it transmits the same bias we're trying to eliminate.
+- **Can we test this?** Usually NO - because we can't observe the omitted variable!
+
+### Criterion 3: Exclusion Restriction
+
+**$Z$ must affect wages ONLY through education, not directly.**
+
+- The instrument should have no direct effect on wages - its only pathway to wages is through education.
+- **Can we test this?** NO - this must be argued theoretically.
+
+<div class="instructor-note">
+**Instructor's Note:**
+
+This is the crucial insight: **only Criterion 1 is testable**. Criteria 2 and 3 require a convincing theoretical argument. This is why finding a good instrument is hard - you need both empirical evidence (relevance) and a good story (exogeneity and exclusion).
+</div>
+
+## Our Candidate Instruments
+
+We have two potential instruments in the data:
+
+1. **Father's Education (`fatheduc`):** Years of schooling completed by the woman's father
+2. **Mother's Education (`motheduc`):** Years of schooling completed by the woman's mother
+
+### Why might parental education work as an instrument?
+
+**Relevance (Criterion 1):** Children of more educated parents tend to get more education themselves - through encouragement, resources, expectations, and role modeling.
+
+**Exogeneity (Criterion 2):** A parents education was determined decades before their child entered the labor market. It shouldn't be correlated with the child's innate ability (conditional on other factors).
+
+**Exclusion Restriction (Criterion 3):** Why would an employer pay you more because your father went to college? The only plausible pathway from father's education to your wages is through YOUR education.
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+
+# Evaluating Potential Instruments
+
+Before running the IV model, we need to check whether our instruments satisfy the criteria.
+
+## Check Criterion 1: Relevance
+
+We can test relevance by looking at correlations and running the first stage regression.
+
+### Correlation Check
+
+```{r}
+# Check correlations between instruments and education
+cor_father <- cor(d$fatheduc, d$educ)
+cor_mother <- cor(d$motheduc, d$educ)
+
+cat("Correlation between father's education and own education:", round(cor_father, 3), "\n",
+  "Correlation between mother's education and own education:", round(cor_mother, 3), "\n")
+```
+
+Both instruments show moderate-to-strong positive correlations with education. This is good evidence for relevance.
+
+### Visualize the Relationships
+```{r, fig.width=10, fig.height=4}
+# Calculate the correlations
+cor_father <- round(cor(d$fatheduc, d$educ, use = "complete.obs"), 3)
+cor_mother <- round(cor(d$motheduc, d$educ, use = "complete.obs"), 3)
+
+# Set up the plotting area (1 row, 2 columns)
+par(mfrow = c(1, 2))
+
+# Father's Education ---
+plot(d$fatheduc, d$educ,
+     xlab = "Father's Education (Years)",
+     ylab = "Own Education (Years)",
+     main = "Father's Education vs. Own Education",
+     pch = 19, 
+     col = rgb(0.2, 0.2, 0.6, 0.3)) # Transparent blue points
+
+# Add regression line (ASU Maroon)
+abline(lm(educ ~ fatheduc, data = d), col = "#8C1D40", lwd = 2)
+
+# Add correlation coefficient to the plot
+legend("bottomleft", 
+       legend = paste("r =", cor_father), 
+       bty = "n",       # No box around the text
+       cex = 1.2,       # Make text slightly larger
+       text.col = "#333333") # Dark grey text
+
+# Mother's Education ---
+plot(d$motheduc, d$educ,
+     xlab = "Mother's Education (Years)",
+     ylab = "Own Education (Years)",
+     main = "Mother's Education vs. Own Education",
+     pch = 19, 
+     col = rgb(0.2, 0.2, 0.6, 0.3))
+
+# Add regression line (ASU Maroon)
+abline(lm(educ ~ motheduc, data = d), col = "#8C1D40", lwd = 2)
+
+# Add correlation coefficient to the plot
+legend("bottomleft", 
+       legend = paste("r =", cor_mother), 
+       bty = "n", 
+       cex = 1.2, 
+       text.col = "#333333")
+```
+### Correlation Matrix with Significance Levels
+```{r}
+# Select variables for correlation analysis
+cor_vars <- d %>% 
+  select(lwage, educ, fatheduc, motheduc, exper)
+
+# Calculate correlation matrix and p-values
+cor_matrix <- cor(cor_vars, use = "complete.obs")
+p_mat <- cor.mtest(cor_vars, conf.level = 0.95)
+
+# Create the Base Plot
+# We set fig.width/height in the chunk header to make it readable
+corrplot(cor_matrix,
+         method = "color",
+         type = "upper",        # Upper triangle only
+         diag = FALSE,          # Hide diagonal
+         addCoef.col = "black", # Add coefficient numbers
+         number.cex = 0.8,      # Resize coefficients
+         tl.col = "black",      # Text label color
+         tl.srt = 45,           # Rotate labels
+         col = colorRampPalette(c("#8C1D40", "white", "#004d40"))(200) 
+) 
+
+# Add Significance Stars Manually
+# Extract p-values
+pvals <- p_mat$p
+n <- ncol(cor_matrix)
+
+# Define stars based on p-values
+stars <- ifelse(pvals < 0.001, "***",
+         ifelse(pvals < 0.01, "**",
+         ifelse(pvals < 0.05, "*", "")))
+
+# Loop through the upper triangle to add stars
+for (i in 1:(n - 1)) {
+  for (j in (i + 1):n) {
+    if (stars[i, j] != "") {
+      # Coordinates: 
+      # x = column index (j)
+      # y = n - row index + 1
+      # We offset slightly to put the star in the top-left corner of the cell
+      text(x = j - 0.25, 
+           y = (n - i + 1) + 0.15, 
+           labels = stars[i, j],
+           col = "red", 
+           cex = 0.9,
+           font = 2) # Bold font
+    }
+  }
+}
+```
+
+Both parents' education levels show clear and statistically significant positive relationships with the woman's own education - good evidence for relevance.
+
+## Criteria 2 and 3: The Theoretical Argument
+
+We cannot directly test exogeneity or the exclusion restriction, but we can argue for them:
+
+**Exogeneity argument:** A parent's education level was determined by their own circumstances decades earlier. There's no reason to think it would be correlated with their daughter's innate cognitive ability, motivation, or other unobserved traits that affect wages.
+
+**Exclusion restriction argument:** Employers don't know (or care about) your parents' education when setting wages. The only way a parent's education could affect your wages is by influencing how much education YOU got.
+
+**Potential concerns:** If educated parent's provide job connections (nepotism) or transmit workplace skills directly, the exclusion restriction might be violated. We acknowledge these concerns but argue they are likely small relative to the education pathway.
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+# Two-Stage Least Squares (2SLS)
+
+## The Procedure
+
+Two-Stage Least Squares works by:
+
+1. **Stage 1:** Regress education on the instrument and controls. Save the predicted values.
+2. **Stage 2:** Regress wages on the *predicted* education values and controls.
+
+The key insight: the predicted values from Stage 1 contain only the variation in education that comes from parental education - variation that is (by assumption) unrelated to ability.
+
+ <div class="instructor-note">
+**Instructor's Note: Choosing Between Candidate Instruments**
+
+So far, we have two candidate instruments that both appear promising based on correlations and theoretical arguments. But before we commit to one for our main analysis, we need to formally test their strength.
+
+**The process:**
+
+1. Run a first stage regression for each candidate instrument
+2. Compare F-statistics (both must pass F > 10 to be viable)
+3. Choose the stronger instrument for our primary analysis
+
+Let's check both instruments before proceeding to the  2SLS procedure.
+</div>
+
+## Stage 1: Predict Education
+
+```{r, results='asis'}
+# First stage with father's education
+first_stage_father <- lm(educ ~ fatheduc + exper + expersq, data = d)
+
+# First stage with mother's education  
+first_stage_mother <- lm(educ ~ motheduc + exper + expersq, data = d)
+
+stargazer(first_stage_father, first_stage_mother,
+          #type = "text", 
+          type = "html",
+          title = "First Stage: Predicting Education",
+          dep.var.labels = "Education (Years)",
+          covariate.labels = c("Father's Education",
+                               "Mother's Education",
+                               "Experience",
+                               "Experience Squared"),
+          omit.stat = c("ser"),
+          digits = 3)
+```
+`fatheduc` has a slightly higher coefficient than `motheduc`, but both suggest that for every additional year of education (by father or mother) their daughters will get $~0.27$ more years of education. 
+
+Regarding `exper` and `expersq`, we see that each additional year of experience increases education slightly, but the negative coefficient on `expersq` captures the diminishing returns to experience.
+
+### Check for Weak Instruments: The F > 10 Rule
+
+A critical diagnostic is the **F-statistic** from the first stage. The rule of thumb: **F > 10** indicates a strong instrument.
+
+With an F-statistic well above 10, we have a strong first stage. Both Father's education and Mother's education are options for our instrumental variable. Given the slightly higher F-statistic for Father's education, we will proceed with it. 
+
+<div class="instructor-note">
+**Instructor's Note:**
+
+**Why F > 10?** When the instrument is only weakly correlated with the policy variable (weak instrument), the IV estimator becomes unreliable - standard errors balloon and the estimator can actually be more biased than OLS. 
+</div>
+
+## Understanding X-hat (Predicted Values)
+
+The first stage produces **predicted values** of education, which we call `educ_hat`. This is the key to how IV eliminates bias.
+```{r}
+# Save predicted values from first stage
+d$educ_hat <- fitted(first_stage_father)
+
+# Show a few example observations
+example_rows <- d[c(1, 5, 10, 15, 20), c("educ", "fatheduc", "educ_hat")]
+example_rows$educ_hat <- round(example_rows$educ_hat, 2)
+
+print(example_rows, row.names = FALSE)
+```
+
+**What are we looking at?**
+
+- `educ` is the woman's actual years of schooling (ranges from 10 to 14 in these examples)
+- `fatheduc` is her father's years of schooling
+- `educ_hat` is her *predicted* education based on father's education and the control variables
+
+Notice that `educ_hat` clusters tightly around 12-14 years, even though actual education varies more. That's because the prediction captures only the systematic component explained by family background - not individual-level factors like ability or motivation that also drive education choices.
+
+<div class="instructor-note">
+**Instructor's Note: The Intuition Behind X-hat**
+
+Think of each woman's education as having two components:
+
+$$\text{Actual Education} = \text{Family Background Component} + \text{Ability/Choice Component}$$
+
+The **family background component** is what we predict from father's education - this part is (by assumption) unrelated to the woman's innate ability.
+
+The **ability/choice component** is everything else—including the part that correlates with unobserved ability and biases our OLS estimate.
+
+By using `educ_hat` (which contains only the family background component) in Stage 2, we estimate the effect of education using only "clean" variation that isn't contaminated by ability.
+</div>
+
+## Stage 2: Estimate the Causal Effect
+
+We could manually run the second stage using the predicted values:
+
+```{r, results='asis'}
+# Manual second stage (for illustration)
+second_stage_manual <- lm(lwage ~ educ_hat + exper + expersq, data = d)
+
+stargazer(second_stage_manual,
+          #type = "text",
+          type = "html",
+          title = "Second Stage (Manual): Effect of Education on Wages",
+          dep.var.labels = "Log Hourly Wage",
+          covariate.labels = c("Education (Predicted)",
+                               "Experience",
+                               "Experience Squared"),
+          omit.stat = c("f", "ser"),
+          digits = 3)
+```
+
+**However, there's a problem with manual two-stage:** The standard errors from a 2SLS shouldn't be trusted. The second stage doesn't "know" that `educ_hat` was estimated with uncertainty in the first stage, so it treats the predicted values as if they were measured perfectly. This can make standard errors too small and significance tests unreliable. For inference testing, we should not rely on this manual approach.
+
+## The Solution: Use `ivreg()`
+
+The `ivreg()` function from the AER package runs both stages internally and correctly calculates the standard errors.
+
+```{r, results='asis'}
+# IV regression using ivreg()
+# Syntax: ivreg(Y ~ X + controls | Z + controls, data)
+iv_model <- ivreg(lwage ~ educ + exper + expersq | fatheduc + exper + expersq, 
+                  data = d)
+
+stargazer(iv_model,
+          #type = "text",
+          type = "html",
+          title = "IV Model using ivreg(): Effect of Education on Wages",
+          dep.var.labels = "Log Hourly Wage",
+          covariate.labels = c("Education",
+                               "Experience",
+                               "Experience Squared"),
+          omit.stat = c("f", "ser"),
+          digits = 3)
+```
+
+<div class="instructor-note">
+**Instructor's Note:**
+
+The `ivreg()` syntax is: `ivreg(Y ~ X + Controls | Z + Controls, data)`
+
+- **Left of `|`:** The outcome equation (what you want to estimate)
+- **Right of `|`:** The first stage variables (instruments + controls)
+
+Control variables appear on BOTH sides because they belong in both stages.
+</div>
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+
+# The Final Verdict
+
+## Summary of Findings
+
+```{r, results='asis'}
+stargazer(naive_model, iv_model,
+          #type = "text", 
+          type = "html",
+          title = "Comparison: Naive OLS vs. IV Model",
+          column.labels = c("Naive OLS", "IV Model"),
+          dep.var.labels = "Log Hourly Wage",
+          covariate.labels = c("Education (Years)",
+                               "Experience (Years)",
+                               "Experience Squared"),
+          omit.stat = c("f", "ser"),
+          digits = 3)
+```
+
+## What Changed?
+
+```{r}
+# Extract coefficients
+ols_coef <- coef(naive_model)["educ"]
+iv_coef <- coef(iv_model)["educ"]
+
+# Calculate difference
+diff <- ols_coef - iv_coef
+pct_change <- (diff / ols_coef) * 100
+
+cat("Naive OLS coefficient on education:", round(ols_coef, 4), "\n",
+    "IV coefficient on education:", round(iv_coef, 4), "\n",
+    "Difference:", round(diff, 4), "\n",
+    "Percentage change:", round(pct_change, 1), "%\n\n",
+    "Bias direction:", ifelse(ols_coef > iv_coef, "OLS OVERESTIMATED", "OLS UNDERESTIMATED"), "\n")
+```
+
+## Understanding the Direction of Bias
+
+**Why did OLS overestimate the returns to education?**
+
+The direction of omitted variable bias depends on two correlations:
+
+1. **Corr(Education, Ability):** Likely POSITIVE—more able people tend to get more education
+2. **Corr(Ability, Wages):** Likely POSITIVE—more able people tend to earn higher wages
+
+When both correlations are positive, the bias is **positive** - OLS **overestimates** the true effect.
+
+**Intuition:** In the naive model, the education coefficient was picking up two things: **(1)** the actual effect of education on wages, and **(2)** the fact that high-ability people get more education AND earn more. The IV model strips out the second part.
+
+## Key Findings
+
+- **Naive OLS estimate:** Each year of education is associated with a 10.7% wage increase
+- **IV estimate:** Each year of education *causes* approximately a 7% wage increase
+- **The difference (~3.7 percentage points):** This represents the "ability premium" - the portion of the wage-education correlation that comes from ability, not from education itself
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+
+## The IV Workflow
+
+<div class="instructor-note">
+**The IV Workflow (Use This for Your Lab):**
+
+1. **Run the naive model** — This is your baseline (biased) estimate
+
+2. **Identify potential instruments** — Variables correlated with the policy variable but not the omitted variable
+
+3. **Check Criterion 1 (Relevance)** — Run first stage, verify F > 10
+
+4. **Argue Criteria 2 & 3** — Make theoretical case for exogeneity and exclusion restriction
+
+5. **Run IV model with `ivreg()`** — Get corrected estimate with proper standard errors
+
+6. **Compare and interpret** — How did the coefficient change? What does this tell us about bias?
+</div>
+
+## Key Takeaways
+
+1. **Omitted variable bias is real.** The naive OLS estimate attributed to education some of the effect that was actually due to ability.
+
+2. **Instrumental variables can fix the bias** — but only if you have a valid instrument that satisfies all three criteria.
+
+3. **Only relevance is testable.** You must make a convincing theoretical argument for exogeneity and the exclusion restriction.
+
+4. **Always check for weak instruments.** Use the F > 10 rule to ensure your first stage is strong enough.
+
+5. **Use `ivreg()` for correct standard errors.** Manual two-stage gives the right coefficients but wrong standard errors.
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">

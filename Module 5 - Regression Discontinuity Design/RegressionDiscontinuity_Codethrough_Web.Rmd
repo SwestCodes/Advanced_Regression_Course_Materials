@@ -1,0 +1,1304 @@
+---
+title: "Regression Discontinuity | Codethrough"
+subtitle: "PAF 512 - Advanced Regression"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    code_folding: show
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+<style>
+  /* --- ASU Theme Elements --- */
+  
+  /* Maroon Headers */
+  h1, h2, h3, h4 {
+    color: #8C1D40 !important;
+  }
+  
+  /* Gold Links */
+  a {
+    color: #D4AF37 !important;
+  }
+  
+/* --- The Instructor Note Box --- */
+  .instructor-note {
+    background-color: #fff8e1 !important; 
+    
+    border-left: 6px solid #8C1D40;
+    color: #2c3e50;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .instructor-note strong {
+    color: #8C1D40;
+    font-size: 1.1em;
+  }
+
+  /* --- Table of Contents Styling --- */
+
+  /* 1. Active State (The section you are currently reading) */
+  .list-group-item.active, 
+  .list-group-item.active:focus, 
+  .list-group-item.active:hover {
+    background-color: #8C1D40 !important;
+    border-color: #8C1D40 !important;
+    color: white !important;
+  }
+
+  /* 2. Level 2 Headers (##) -> GOLD Bar */
+  /* This targets any subheader */
+  .tocify-subheader .list-group-item {
+    background-color: #f9f9f9; 
+    border-left: 4px solid #FFC627 !important; /* ASU Gold */
+    font-size: 0.9em; 
+    color: #555; 
+    padding-left: 15px !important; 
+  }
+
+  /* 3. Level 3 Headers (###) -> MAROON Bar */
+  /* This targets a subheader INSIDE another subheader */
+  .tocify-subheader .tocify-subheader .list-group-item {
+    border-left: 4px solid #8C1D40 !important; /* ASU Maroon */
+    padding-left: 30px !important; /* Double the indentation */
+  }
+
+  /* 4. Hover Effects */
+  .tocify-subheader .list-group-item:hover {
+    background-color: #fffdf2 !important;
+    color: #8C1D40 !important;
+  }
+  /* --- Code Block High Contrast Overrides --- */
+
+  /* 1. The Code Block Container */
+  pre {
+    background-color: #f4f4f4 !important; /* Light grey background */
+    border: 1px solid #ddd !important;     /* Subtle border definition */
+    color: #212529 !important;             /* Force base text to be VERY dark grey */
+    font-weight: 500;                      /* Make text slightly thicker */
+  }
+
+  /* 2. Comments (The most important fix) */
+  /* We target the class '.co' which R uses for comments */
+  code span.co {
+    color: #486a48 !important; /* A dark, readable forest green */
+    font-style: italic;        /* Italicize to differentiate from code */
+    font-weight: normal;       /* Keep comments lighter weight */
+  }
+
+  /* 3. Strings (Text inside quotes) */
+  code span.st {
+    color: #8C1D40 !important; /* Use ASU Maroon for strings! */
+    font-weight: bold;
+  }
+  
+  /* 4. Numbers and Keywords */
+  code span.dv, code span.kw {
+     color: #004d40 !important; /* Dark teal for numbers/logic */
+  }
+</style>
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+
+
+# What Will We Cover?
+
+#### 1. Understanding the Problem: Selection at a Cutoff
+
+- When programs use cutoffs, comparison groups are fundamentally different
+- Sharp vs. Fuzzy RDD (and how to tell which you have)
+
+#### 2. The Policy Problem
+
+- Research question: Does winning a close election help you win the next one?
+- The U.S. Senate election data
+
+#### 3. The Naive Comparison
+
+- Compare winners vs. losers directly
+- Why this comparison is misleading
+
+#### 4. The Regression Discontinuity Solution
+
+- The key insight: near the cutoff, treatment is basically random
+- The model formula and what each coefficient means
+- Linear vs. polynomial approaches
+
+#### 5. The Basic Approach: Using `lm()`
+
+- Run RDD with familiar tools
+- Interpret the coefficients
+- Visualize the discontinuity
+- Limitations of this approach
+
+#### 6. The Professional Approach: Using `rdrobust()`
+
+- Why `rdrobust()` is the industry standard
+- Understanding bandwidth selection
+- Reading the output (what all those numbers mean)
+- Testing sensitivity to bandwidth choices
+- Visualizing with `rdplot()`
+
+#### 7. Understanding the Counterfactual
+
+- What would have happened to winners if they had lost?
+- The Local Average Treatment Effect (LATE)
+
+#### 8. Checking Assumptions
+
+- Is our design actually sharp?
+- Could people have manipulated their scores?
+
+#### 9. The Final Verdict
+
+- Summary of findings
+- The RDD workflow for your lab
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+
+# Understanding the Problem
+
+## When Cutoffs Create Trouble
+
+Many programs and policies use cutoffs to determine who gets in:
+
+- Students scoring below 60 on a test must attend summer school
+- Families earning below a threshold qualify for housing assistance
+- Candidates receiving more than 50% of votes win elections
+
+The problem? People on opposite sides of these cutoffs are usually very different from each other. A student who scored 30 on a math test is not comparable to a student who scored 90. If we simply compare the outcomes of these two groups, we're comparing apples to oranges.
+
+This is the same selection problem we've encountered before - the groups differ in ways that affect both their treatment status AND their outcomes.
+
+## The RDD Insight
+
+Here's the key insight that makes Regression Discontinuity work: **people right at the cutoff are nearly identical.**
+
+Think about it. What's really the difference between a student who scored 59 and one who scored 61? Not much - maybe the 59 had a bad day, or got unlucky on one question. These students have essentially the same underlying ability, but one gets the treatment (summer school) and one doesn't.
+
+Near the cutoff, whether you end up just above or just below is basically random. This is called **local randomization** - and it's what allows us to estimate causal effects.
+
+## Sharp vs. Fuzzy RDD
+
+Before we dive in, there's an important distinction to understand:
+
+**Sharp RDD:** The cutoff perfectly determines treatment. Everyone below gets treated, everyone above doesn't (or vice versa). No exceptions.
+
+- Example: You win an election if and only if you get more than 50% of the vote
+- Example: Students below 60 MUST attend summer school, no opt-outs allowed
+
+**Fuzzy RDD:** The cutoff affects the probability of treatment, but doesn't perfectly determine it. Some people above the cutoff still get treated, or some below don't.
+
+- Example: Students below 60 are recommended for tutoring, but attendance is optional
+- Example: Income below threshold makes you eligible for a program, but you have to apply
+
+Fuzzy RDD is more complicated and requires instrumental variable techniques. For this course, we'll focus on **sharp RDD**, which is conceptually cleaner.
+
+<div class="instructor-note">
+**Instructor's Note:**
+
+How do you know if your design is sharp or fuzzy? Plot it! If treatment status jumps from 0 to 1 exactly at the cutoff (a perfect step function), it's sharp. If there's a jump but it's not from 0 to 1 (say, from 20% to 80%), it's fuzzy. We'll show you how to check this later.
+
+If you encounter a fuzzy design in your own research, the `rdrobust` package can handle it, but the interpretation becomes more complex. For more on fuzzy RDD, see Angrist and Pischke's "Mostly Harmless Econometrics."
+</div>
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+
+# The Policy Problem
+
+## Research Question
+
+**Does winning a close election give you an advantage in the next election?**
+
+This is a classic question in political science. Incumbents (people currently holding office) tend to win re-election at high rates. But is this because being an incumbent actually helps you? Or is it just that good candidates both win elections AND keep winning?
+
+Think about it: candidates who win elections might be more charismatic, better funded, or more aligned with their constituents. These same traits would help them win future elections regardless of whether they're incumbents.
+
+## Why Elections Are Perfect for RDD
+
+Elections have a beautiful property: there's a sharp cutoff. If you get the most votes, you win. If you get less, you lose. There's no gray area.
+
+And here's the key: in a very close election, whether you end up at 50.1% or 49.9% is essentially random. Maybe a few voters got stuck in traffic, or the weather was different in one part of the district. The candidates themselves are nearly identical in quality - that's why the election was so close!
+
+By comparing candidates who barely won to candidates who barely lost, we can isolate the causal effect of incumbency itself.
+
+## The Data
+
+We'll use the **U.S. Senate election dataset** which contains Senate election results from 1914 - 2010 and is built into the `rdrobust` package.
+
+### Key Variables
+
+| Variable | Description |
+|----------|-------------|
+| `margin` | Calculated by subtracting the percentage of the Republican votes from the percentage of Democratic votes (% Democrat - % Republican) in election $t$. Positive means Democrats won, negative means they lost. This is our **running variable**. |
+| `vote` | Democratic vote share in the NEXT election ($t+1$) for that same Senate seat. This is our **outcome variable**. |
+
+The cutoff is at `margin = 0`. If `margin > 0`, Democrats won and become incumbents. If `margin < 0`, Democrats lost.
+
+<div class="instructor-note">
+**Instructor's Note:**
+
+In your lab you will need to center the running variable yourself, while in this dataset the running variable `margin` is already centered. We center the running variable to make interpretation meaningful. See the note in the lecture within section 2.2 under $B_2$ explanation.
+</div>
+
+## Setup and Data Loading
+
+```{r}
+# Install packages if needed
+# install.packages("rdrobust")
+# install.packages("stargazer")
+
+library(rdrobust)
+library(stargazer)
+
+# Load the Senate election data (built into rdrobust)
+data("rdrobust_RDsenate")
+
+# Let's give it a shorter name
+senate <- rdrobust_RDsenate
+
+# Check what we're working with
+head(senate)
+```
+
+It is crucial to understand exactly what the data represents. Our running variable, `margin` represents the difference in percentage of the vote between the Democrat candidate and the Republican. A negative value represents the Democratic Candidate lost and by how many percentage points. Look at our first row, the value $-7.69$ which means the Democratic candidate lost by ~$7.7\%$. The `vote` variable represents the proportion of total votes they received at the next election, 6 years later. The farther away from $0$, the farther from the cutoff.
+
+```{r}
+# Total number of rows in our data
+nrow(senate)
+```
+
+```{r}
+# Summary statistics
+summary(senate)
+```
+
+
+Let's visualize the data to get a feel for what we're working with:
+
+```{r, fig.width=10, fig.height=5}
+# Set up a two-panel plot
+par(mfrow = c(1, 2))
+
+# Left panel: Distribution of margin (running variable)
+hist(senate$margin, 
+     breaks = 40,
+     main = "Distribution of Vote Margin",
+     xlab = "Democratic Vote Margin (%)",
+     col = "lightblue",
+     border = "white")
+abline(v = 0, col = "#8C1D40", lwd = 2, lty = 2)
+
+# Right panel: Relationship between margin and next election vote share
+plot(senate$margin, senate$vote,
+     pch = 19,
+     col = rgb(0.2, 0.2, 0.6, 0.4),
+     xlab = "Vote Margin in Election t",
+     ylab = "Vote Share in Election t+1",
+     main = "Senate Elections: Current Margin vs. Next Vote Share")
+abline(v = 0, col = "#8C1D40", lwd = 2, lty = 2)
+```
+
+Already we can see something interesting in the right panel - there appears to be a "jump" right at the cutoff. Candidates who barely won seem to do better in the next election than candidates who barely lost. That's the discontinuity we're trying to measure!
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+
+# The Naive Comparison
+
+Before we use RDD, let's see what happens when we just compare winners to losers directly. This will show us why we need a more sophisticated approach.
+
+## Create Treatment Variable
+
+First, we need a variable indicating who won (treatment) vs. who lost (control):
+
+```{r}
+# Create treatment variable: 1 if Democrats won, 0 if they lost
+senate$treat <- ifelse(senate$margin > 0, 1, 0)
+
+# Check the split
+table(senate$treat)
+```
+
+## Compare Group Means
+
+Now let's compare the average next-election vote share for winners vs. losers:
+
+```{r}
+# Calculate means for each group
+mean_winners <- mean(senate$vote[senate$treat == 1], na.rm = TRUE)
+mean_losers <- mean(senate$vote[senate$treat == 0], na.rm = TRUE)
+
+cat("Average next-election vote share:\n",
+    "  Winners (incumbents):", round(mean_winners, 2), "%\n",
+    "  Losers:", round(mean_losers, 2), "%\n",
+    "  Difference:", round(mean_winners - mean_losers, 2), "percentage points\n")
+```
+
+That's a big difference! Winners get about $21.7$ percentage points more in the next election.
+
+## T-Test
+
+Let's confirm this difference is statistically significant:
+
+```{r}
+# T-test comparing winners to losers
+t_result <- t.test(vote ~ treat, data = senate)
+print(t_result)
+```
+
+The results of our t-test suggest we can be 95% confident that the mean difference between the two groups is between ~20 and ~23 percentage points. However, this estimate is **unreliable** for identifying a causal effect. 
+
+## Why This Is Wrong
+
+The problem is that we're comparing ALL winners to ALL losers. But candidates who won by 20 points are very different from candidates who lost by 20 points. The winners were probably better candidates to begin with - more popular, better funded, more skilled campaigners.
+
+Let's see this visually:
+
+```{r, fig.width=8, fig.height=6}
+# Color points by treatment status
+colors <- ifelse(senate$treat == 1, 
+                 "lightblue",   # Blue for winners
+                 "salmon")   # Red for losers
+
+plot(senate$margin, senate$vote,
+     pch = 19, col = colors,
+     xlab = "Vote Margin in Election t",
+     ylab = "Vote Share in Election t+1",
+     main = "The Problem with Naive Comparison")
+abline(v = 0, col = "black", lwd = 2, lty = 2)
+
+# Add group means as horizontal lines
+abline(h = mean_winners, col = "darkblue", lwd = 3, lty = 3)
+abline(h = mean_losers, col = "darkred", lwd = 3, lty = 3)
+
+# Legend
+legend("bottomright", 
+       legend = c("Winners", "Losers", "Winner Mean", "Loser Mean"),
+       col = c("lightblue", "salmon", "darkblue", "darkred"),
+       pch = c(19, 19, NA, NA),
+       lty = c(NA, NA, 3, 3),
+       lwd = 2)
+```
+
+See the problem? The blue points (winners) are clustered on the right side of the graph - they had higher margins to begin with. The red points (losers) are on the left. We're not comparing similar candidates at all.
+
+
+# The Regression Discontinuity Solution
+
+## The Key Insight
+
+The RDD focuses on measurement to only compare candidates **right at the cutoff**.
+
+A candidate who won with $1\%$ and a candidate who lost with $1\%$ are essentially identical in terms of candidate quality, campaign resources, and voter appeal. The only meaningful difference is that one is now an incumbent and one isn't.
+
+By focusing on this narrow window around the cutoff, we're essentially running a natural experiment.
+
+## The Model
+
+The basic RDD model looks like this:
+
+$$Y = \beta_0 + \beta_1 \cdot Treatment + \beta_2 \cdot Running\_Variable + \epsilon$$
+
+For our Senate data:
+
+$$Vote_{t+1} = \beta_0 + \beta_1 \cdot Win_t + \beta_2 \cdot Margin_t + \epsilon$$
+
+### What Each Coefficient Means
+
+| Coefficient | Interpretation |
+|-------------|----------------|
+| $\beta_0$ | Predicted outcome for a **loser** right at the cutoff (margin = 0) |
+| $\beta_1$ | The **treatment effect** - the "jump" at the cutoff. This is what we care about! |
+| $\beta_2$ | The relationship between margin and next-election vote share (the slope) |
+
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+
+# The Naive (biased) RDD Approach:
+
+
+<div class="instructor-note">
+**Instructor's Note: `lm()` is the wrong approach**
+
+In your lecture materials you saw the use of `lm()` as a method of running a Regresssion Discontinuity Design. This helps us understand what's happening under the hood; however, **it is critical to note that using using a model with parallel trends produces a biased estimate. What you learned in your lecture is strictly for pedagogical purposes and is not the method you should use for actual inference testing.** 
+</div>
+
+## Run the Model
+
+```{r, results='asis'}
+# RDD model with lm()
+# Recall, margin is already centered at 0
+rdd_lm <- lm(vote ~ treat + margin, data = senate)
+
+stargazer(rdd_lm,
+          #type = "text",
+          type = "html",
+          title = "RDD Model Using lm()",
+          dep.var.labels = "Vote Share in Next Election",
+          covariate.labels = c("Won Election (Treatment)", 
+                               "Vote Margin"),
+          omit.stat = c("f", "ser"),
+          digits = 3)
+```
+
+## Interpret the Coefficients
+
+Let's break down what each coefficient tells us:
+
+`Treatment`:
+
+  -  $b_1$ coefficient represents level-change at the cutoff, this is the impact of incumbency at the cutoff (in a close race). Being the incumbent is estimated to generate an additional $4.785\%$ of the share of votes, but only in a close race (around the cutoff). 
+
+`Vote Margin`:
+
+  - $b_2$ is the slope, for every additional percentage point of `margin` earned during the first election cycle, we can estimate an additional $0.348\%$ points in the next election.
+  
+`Intercept`:
+
+  - $b_0$, our constant, represents the estimated proportion of the vote share for the Democratic candidate that lost the election at the cutoff (`margin` = 0). In our case, the average proportion of vote share is $47.33\%$. 
+
+
+**The key finding:** Winning a close election causes about a $4.8$ percentage point increase in the next election's vote share. That's the incumbency advantage - and it's quite a bit smaller than the naive $21$-point estimate we got earlier!
+
+## Visualize the Discontinuity
+
+Let's create a plot that shows the RDD visually:
+
+```{r, fig.width=10, fig.height=7}
+
+# Extract coefficients from our lm() model
+b0 <- coef(rdd_lm)[1]  # Intercept
+b1 <- coef(rdd_lm)[2]  # Treatment effect
+b2 <- coef(rdd_lm)[3]  # Slope (margin coefficient)
+
+# Set up colors
+col_control <- "salmon"  # Red for losers
+col_treat <-   "lightblue"  # Blue for winners
+
+# Create the scatter plot
+plot(senate$margin, senate$vote,
+     pch = 19,
+     col = ifelse(senate$treat == 1, col_treat, col_control),
+     xlab = "Vote Margin in Election t (%)",
+     ylab = "Vote Share in Election t+1 (%)",
+     main = "Regression Discontinuity: Incumbency Advantage in Senate Elections")
+
+# Add vertical line at cutoff
+abline(v = 0, col = "black", lwd = 2, lty = 2)
+
+# Add fitted lines for each group
+# For losers (margin < 0): Y = b0 + b2*margin
+# For winners (margin > 0): Y = b0 + b1 + b2*margin
+
+margin_seq_control <- seq(min(senate$margin, na.rm = TRUE), 0, length.out = 100)
+margin_seq_treat <- seq(0, max(senate$margin, na.rm = TRUE), length.out = 100)
+
+fitted_control <- b0 + b2 * margin_seq_control
+fitted_treat <- b0 + b1 + b2 * margin_seq_treat
+
+lines(margin_seq_control, fitted_control, col = "darkred", lwd = 3)
+lines(margin_seq_treat, fitted_treat, col = "darkblue", lwd = 3)
+
+# Add legend
+legend("bottomright",
+       legend = c("Losers", "Winners", "Fitted (Losers)", "Fitted (Winners)", "Cutoff"),
+       col = c(col_control, col_treat, "darkred", "darkblue", "black"),
+       pch = c(19, 19, NA, NA, NA),
+       lty = c(NA, NA, 1, 1, 2),
+       lwd = c(NA, NA, 3, 3, 2),
+       bg = "white")
+
+# Add annotation showing the "jump"
+arrows(2, b0, 2, b0 + b1, col = "black", lwd = 2, code = 3, length = 0.1)
+text(22, 50, paste("Treatment Effect\n=", round(b1, 1), "points"), 
+     col = "black", font = 2)
+```
+
+The "jump" between the two lines at the cutoff is our treatment effect. You can see it's substantial - winning a close election really does boost your performance in the next election.
+
+## The Interaction Model `lm()`
+
+There is a subtle but important assumption we made in the previous model: we assumed the slope was the same for winners and losers.
+
+Look closely at the formula we used: `vote ~ treat + margin`. This forces R to fit parallel lines. It assumes that the relationship between the margin and future votes is exactly the same for winners and losers, just shifted up or down.
+
+But what if winning changes the relationship itself? What if incumbents gain votes at a different rate than challengers? To allow for this, we need to include an **interaction term**.
+
+We change our formula to:
+
+$$Vote_{t+1} = \beta_0 + \beta_1 \cdot Win_t + \beta_2 \cdot Margin_t + \beta_3 \cdot (Win_t \times Margin_t) + \epsilon$$
+
+This allows the two groups to have different slopes:
+
+- **Losers' Slope:** $\beta_2$
+- **Winners' Slope:** $\beta_2 + \beta_3$
+
+### Run the Interaction Model
+
+We can simply multiply the variables (`treat * margin`) to automatically include the main effects and the interaction.
+
+```{r}
+# The long hand approach for an interaction term
+rdd_interaction <- lm(vote ~ treat + margin + treat:margin, data = senate)
+
+# Technically, you can also use the shorthand approach for the same output
+rdd_interaction_shorthand <- lm(vote ~ treat * margin, data = senate)
+
+stargazer(rdd_lm,rdd_interaction, rdd_interaction_shorthand,
+          #type = "text",
+          type = "html",
+          title = "RDD Model with Interaction",
+          column.labels = c("Basic", "Interaction Long", "Interaction Short"),
+          dep.var.labels = "Vote Share in Next Election",
+          covariate.labels = c("Won Election (Treatment)", 
+                               "Vote Margin",
+                               "Interaction (Treat x Margin)"),
+          omit.stat = c("f", "ser"),
+          digits = 3)
+```
+
+
+### Interpret the Coefficients
+
+Let's look at how our results change:
+
+
+`Treatment`:
+
+  -  $b_1$ coefficient represents the level-change at the cutoff, this is the impact of incumbency. Being the incumbent is estimated to generate an additional $6.044\%$ of the share of votes. Notice the increase in treatment coefficient compared to the original model. Removing the restriction to have parrallel lines on each side of the cutoff allowed for room to more accurately assess the treatment effect, thus the increase in effect size.
+
+`Vote Margin`:
+
+  - $b_2$ now represents the slope of those who lost. For every additional percentage point of `margin` earned during the first election cycle, we can estimate an additional $0.216\%$ points in the next election. This is decreased from our original model because our interaction term provides distinct slopes rather than a single aggregate slope. Thus revealing the slope of those who lost no longer driven up by the weight of those who won. 
+  
+`Interaction`:
+
+  - $b_3$ is the difference in the slope between the winners and losers. The difference is $1.70$, meaning, for every additional point of margin the winner receives in the first election, the following election we predict they will receive an additional $1.7\%$ share of the votes compared to that of those who lost. This alone represents the difference; adding $b_2 + b_3$ gives us the actual slope of the incumbent side ()
+  
+`Intercept`:
+
+  - $b_0$, our constant also changed. It continues to represent the estimated proportion of the vote share for the Democratic candidate that lost the election at the cutoff (`margin` = 0) but it dropped when allowing for differing slopes. A more accurate average proportion of vote share for the loser is $44.90\%$.
+
+
+### Visualize the Interaction
+
+Let's plot this to see the difference. We will now calculate separate fitted lines that are allowed to have different angles.
+
+```{r}
+# Extract coefficients from the interaction model
+b0 <- coef(rdd_interaction)[1]  # Intercept
+b1 <- coef(rdd_interaction)[2]  # Treatment (Jump)
+b2 <- coef(rdd_interaction)[3]  # Margin (Loser Slope)
+b3 <- coef(rdd_interaction)[4]  # Interaction (Difference in Slopes)
+
+# Create the scatter plot
+plot(senate$margin, senate$vote,
+     pch = 19,
+     col = ifelse(senate$treat == 1, "lightblue", "salmon"),
+     xlab = "Vote Margin in Election t (%)",
+     ylab = "Vote Share in Election t+1 (%)",
+     main = "RDD with Interaction: Allowing Different Slopes")
+
+# Add vertical line at cutoff
+abline(v = 0, col = "black", lwd = 2, lty = 2)
+
+# Generate sequences for plotting
+margin_seq_control <- seq(min(senate$margin, na.rm = TRUE), 0, length.out = 100)
+margin_seq_treat <- seq(0, max(senate$margin, na.rm = TRUE), length.out = 100)
+
+# Calculate fitted values
+# Losers: Y = b0 + b2*margin
+fitted_control <- b0 + b2 * margin_seq_control
+
+# Winners: Y = b0 + b1 + (b2 + b3)*margin
+# Note: We add b3 to the slope for the treatment group
+fitted_treat <- (b0 + b1) + (b2 + b3) * margin_seq_treat
+
+# Draw the lines
+lines(margin_seq_control, fitted_control, col = "darkred", lwd = 3)
+lines(margin_seq_treat, fitted_treat, col = "darkblue", lwd = 3)
+
+# Add Legend
+legend("bottomright",
+       legend = c("Losers", "Winners", "Losers Slope", "Winners Slope"),
+       col = c("salmon", "lightblue", "darkred", "darkblue"),
+       pch = c(19, 19, NA, NA),
+       lty = c(NA, NA, 1, 1),
+       lwd = c(NA, NA, 3, 3))
+```
+
+**Why this is better:** We can see a distinct increase in the slope of the incumbents compared to the slope of those whom lost.
+
+
+
+## Limitations of the lm() Approach
+
+The `lm()` approach is great for understanding, but it has some problems:
+
+1. **Uses all the data:** We're including candidates who won by 40 points alongside candidates who won by 1 point. But the RDD logic only really applies near the cutoff.
+
+2. **Assumes linearity everywhere:** The relationship between margin and vote share might be curved, especially far from the cutoff.
+
+3. **Standard errors may be wrong:** Technical issues with inference at boundaries mean our confidence intervals might not be reliable.
+
+This is where `rdrobust()` comes in - it's designed specifically for RDD and handles all these issues automatically.
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+
+# The Professional Approach
+
+## Why rdrobust()?
+
+The `rdrobust()` function is the industry standard for RDD analysis. It's what you'll see in published research, and it solves the problems with the basic `lm()` approach:
+
+1. **Optimal bandwidth selection:** It automatically figures out how close to the cutoff to focus
+2. **Bias correction:** It adjusts for the approximation error that comes from using local polynomials
+3. **Proper standard errors:** It calculates confidence intervals that actually have the correct coverage
+4. **Unique slopes:** Defaults to calculating different slopes on each side of the cutoff
+
+Let's see it in action.
+
+## What Is Bandwidth?
+
+The **bandwidth** is how far from the cutoff we look. A larger bandwidth contains more observations farther from the cutoff, while a narrow bandwidth contains less observation but closer to the cutoff.
+
+- **Narrow bandwidth:** Only candidates very close to the cutoff (e.g., within 5 percentage points). Very comparable groups, but fewer observations means more noise.
+
+- **Wide bandwidth:** Candidates further from the cutoff (e.g., within 20 points). More observations, but groups are less comparable.
+
+There's a tradeoff: zoom in too close and you don't have enough data; zoom out too far and you're comparing candidates who aren't really similar.
+
+`rdrobust()` calculates an optimal bandwidth that balances this tradeoff.
+
+## Running rdrobust()
+
+```{r}
+# Run rdrobust
+# y = outcome variable
+# x = running variable  
+# c = cutoff (default is 0)
+rd_model <- rdrobust(y = senate$vote, 
+                     x = senate$margin, 
+                     c = 0)
+
+# Display results
+
+#### IMPORTANT - stargazer & rdrobust() do not get along. You can simply use summary()
+summary(rd_model)
+```
+
+That's a lot of output! Let's break it down.
+
+
+## Reading the rdrobust() Output
+
+The output gives us everything we need:
+
+- `Number of Obs.` - The number of observations in our base dataset (minus NULLs).
+
+- `BW type: mserd` - Method used to select bandwidth (Mean Squared Error, optimizes the balance between bias and variance). 
+
+- `Kernel: Triangular` - How observations are weighted (closer to cutoff = more weight). 
+
+- `VCE method: NN` - How standard errors are calculated (nearest neighbor)
+
+
+- `Number of Obs.` - Total observations on each side
+
+- `Eff. Number of Obs.` - Observations within the bandwidth (actually used)
+
+- `Order est. ($p$)` - Polynomial order (1 = linear, 2 = quadratic)
+
+- `Order Bias ($q$)` - Polynomial order used for bias correction. This is typically $p+1$ (so if you used a linear model $p=1$, this will be quadratic $q=2$). It helps estimate the error in the main line.
+
+- `BW est. ($h$)` - The optimal bandwidth (above and below cutoff)
+
+- `rho ($h/b$)` - The ratio of the main bandwidth to the bias-correction bandwidth. The bias bandwidth ($b$) is usually wider than the main bandwidth ($h$), so this number is typically less than 1.
+
+- `Unique Obs.` - The number of distinct values of the running variable. If this number is very low compared to Number of Obs., it means many people have the exact same score ("mass points"), and you may need to cluster your standard errors.
+
+**Bottom section - The results:**
+- `RD Effect` - **This is your treatment effect!**
+
+- `$z$` and `$P>|z|$` - Test statistic and p-value for significance testing
+
+- `95% C.I.` - Confidence interval for the treatment effect
+
+
+## What Do These Results Tell Us?
+
+That's a lot of output! But don't worry - let's break down the pieces that actually matter.
+
+**The Treatment Effect**
+
+The `RD Effect` is **7.414**. This is the number we care about most. It tells us that winning a close election boosts a candidate's vote share in the next election by about **7.4 percentage points**. That's the incumbency advantage.
+
+**Is It Statistically Significant?**
+
+The p-value is essentially zero (p < 0.001). So yes - this effect is real, not just noise. We can confidently say that incumbency helps candidates in future elections.
+
+**How Precise Is Our Estimate?**
+
+The 95% Confidence Interval is **[4.094, 10.919]**. This means we're 95% confident the true effect is somewhere between 4 and 11 percentage points. Notice the entire interval is above zero - another way to confirm the effect is positive and significant.
+
+**What Bandwidth Did It Choose?**
+
+The optimal bandwidth (`BW est.`) is **17.75** percentage points. This means the model focused on candidates who won or lost by about 18 points or less. Everyone else - the landslide winners and losers - got filtered out because they're not useful for estimating what happens right at the cutoff.
+
+**How Many Observations Were Actually Used?**
+
+Inside that bandwidth, we have **683 elections** (360 on the left, 323 on the right). Our full dataset had 1,297 elections, but the model wisely ignored the blowouts. Comparing someone who won by 50 points to someone who lost by 50 points doesn't tell us much about what happens in close races.
+
+
+## Bandwidth Sensitivity
+
+Here's an important practical point: **don't just trust the default bandwidth.** You should check whether your results are stable across different bandwidth choices.
+
+If your finding is real, it should hold up (more or less) whether you use a slightly smaller or larger bandwidth. If the effect flips sign or disappears when you change the bandwidth a little, be skeptical.
+
+```{r}
+# Extract the optimal bandwidth from the previous model
+default_bw <- 17.754
+rd_half <- rdrobust(y = senate$vote, x = senate$margin, c = 0, h = default_bw / 2)
+rd_onehalf <- rdrobust(y = senate$vote, x = senate$margin, c = 0, h = default_bw * 1.5)
+rd_double <- rdrobust(y = senate$vote, x = senate$margin, c = 0, h = default_bw * 2)
+
+# Build a summary table comparing different bandwidths
+summary_table <- data.frame(
+  Model = c("Half BW", "Default BW", "1.5x BW", "Double BW"),
+  
+  # bandwidth selection indexes pull in the bandwidth value on the left side. This matches our right side as we used symmetrical bandwidths. 
+  Bandwidth = c(rd_half$bws[1, 1], 
+                rd_model$bws[1, 1], 
+                rd_onehalf$bws[1, 1],
+                rd_double$bws[1, 1]),
+  
+   # conventional coefficient, be sure to utilize this value in your lab
+  Effect = c(rd_half$coef[1],
+             rd_model$coef[1],  
+             rd_onehalf$coef[1], 
+             rd_double$coef[1]), 
+  
+  # Extracts the robust p-value for proper inference
+  P_Value = c(rd_half$pv[3], 
+              rd_model$pv[3], 
+              rd_onehalf$pv[3],
+              rd_double$pv[3]),
+  
+  # Extracts the lower bound of the robust confidence interval
+  CI_Lower = c(rd_half$ci[3, 1], 
+               rd_model$ci[3, 1], 
+               rd_onehalf$ci[3, 1],
+               rd_double$ci[3, 1]),
+  
+  # Extracts the upper bound of the robust confidence interval
+  CI_Upper = c(rd_half$ci[3, 2], 
+               rd_model$ci[3, 2],
+               rd_onehalf$ci[3, 2],
+               rd_double$ci[3, 2])
+)
+
+# Round numeric columns for cleaner display
+summary_table[, -1] <- round(summary_table[, -1], 3)
+print(summary_table)
+```
+
+
+**What does this tell us?**
+
+The treatment effect is stable across all four bandwidths - somewhere between 7.2 and 8.4 percentage points, and always statistically significant (p ~ 0). That's exactly what we want to see.
+
+Notice the confidence interval for the half-bandwidth model is much wider [7.4, 18.6] compared to the others. Why? When we zoom in too close to the cutoff, we're left with fewer observations. Fewer data points means more uncertainty, which shows up as wider confidence intervals.
+
+The default, 1.5x, and double bandwidth models all tell a consistent story: winning a close election boosts your next-election vote share by about 7 percentage points. The fact that this result holds across different bandwidth choices gives us confidence that the incumbency advantage is real - not just an artifact of how we set up the model.
+
+
+<div class="instructor-note">
+**Instructor's Note:**
+
+In real research, you should always report a bandwidth sensitivity analysis. If your results only hold for one specific bandwidth but fall apart otherwise, that's a red flag.
+</div>
+
+## Polynomial Order
+
+By default, `rdrobust()` fits straight lines on each side of the cutoff - this is called a local **linear** fit (p = 1). If you suspect the relationship might be curved, you can fit a **quadratic** instead (p = 2).
+
+How do you know which to use? Run both and compare:
+```{r}
+# Linear (default)
+rd_linear <- rdrobust(y = senate$vote, x = senate$margin, c = 0, p = 1)
+
+# Quadratic
+rd_quad <- rdrobust(y = senate$vote, x = senate$margin, c = 0, p = 2)
+
+cat("Linear (p = 1):    Effect =", round(rd_linear$coef[1], 2), 
+    " | 95% CI: [", round(rd_linear$ci[3,1], 2), ",", round(rd_linear$ci[3,2], 2), "]\n",
+    "Quadratic (p = 2): Effect =", round(rd_quad$coef[1], 2),
+    " | 95% CI: [", round(rd_quad$ci[3,1], 2), ",", round(rd_quad$ci[3,2], 2), "]\n")
+```
+
+The estimates are similar - both show an incumbency advantage around 7-8 points. When linear and quadratic agree, stick with linear. If they gave wildly different answers (say, one positive and one negative), that would be a red flag worth investigating.
+
+<div class="instructor-note">
+**Instructor's Note:**
+
+For this course, just use the default linear specification (p = 1). The `rdrobust()` authors recommend it as the standard approach, and it works well for most applications. Polynomial order selection is a more advanced topic - if your linear and quadratic results are similar, you're fine. Don't overthink it.
+</div>
+
+
+## Visualizing with `rdplot`
+```{r}
+# Visualizing the RD effect
+# rdplot uses bins, like a histogram, to calculate the mean of the outcome at different levels of the running variable, makes it less noise
+# rdplot defaults to using a polynomial; to override this include p = 1 as an argument
+
+rdplot(y = senate$vote, 
+       x = senate$margin, 
+       title = "RD Plot: Senate Election Data",
+       x.label = "Vote Margin (Centered)",
+       y.label = "Vote Share Next Election",
+       p=1) # Linear lines, but different slopes on each side of the cutoff
+```
+## Interpreting the Plot:
+
+Using `rdplot()` allows for a simple way to capture the slope on each side of the cutoff, whereas our earlier naive (biased) `lm()` model assumed parallel lines and we had to then include an interaction term for dual slopes.
+
+**Note on the "Bins":** 
+Notice the dots in the plot above don't look like the scatterplot we made earlier with `lm()`. That is because `rdplot()` does not plot every single data point (which can be noisy). Instead, it creates bins. It groups observations with similar `margin` scores together and plots the average outcome for that bin. This technique smooths out the noise and makes the discontinuity much easier for the human eye to see.
+
+**Note on the Lines: **
+As noted in the code comments, `rdplot()` defaults to using a fourth-order polynomial — meaning, it fits a flexible curve that can bend to track the data. For simplicity, we included the $p = 1$ argument to force it to plot straight lines. This aligns with our linear estimate in `rdrobust()`.
+
+**The "Zoomed In" View (Local)**
+The plot above uses all of our data (Global). However, remember that RDD is a local estimator - it cares about what happens right next to the cutoff.The steep slope on the right side of the global plot is being influenced by outliers (candidates who won by a landslide). To see what the model is actually estimating, let's filter our data to look only at the observations within our optimal bandwidth ($17.754$).
+
+```{r}
+# Filter down to only datapoints within our optimal bandwidth
+zoomed_in <- senate[senate$margin >= -17.754 & senate$margin <= 17.754, ]
+
+rdplot(y = zoomed_in$vote, 
+       x = zoomed_in$margin, 
+       title = "RD Plot: Senate Election Data",
+       x.label = "Vote Margin (Centered)",
+       y.label = "Vote Share Next Election",
+       p = 1) # Linear lines, but different slopes on each side of the cutoff
+```
+**What does this tell us?**
+Notice that our slops appear very similar when we zoom in, but the jump is ever more clear. What does this tell us? 
+
+**Slopes:**
+When we zoom in, the slopes on either side of the cutoff look much more similar than they did in the global plot. This confirms that the steepness we saw earlier was largely driven by candidates far away from the cutoff.
+  
+**The Jump:**
+Most importantly, the discontinuity (the vertical jump at 0) is still very clear. Even when comparing similar candidates in close races, the winners start with a significantly higher vote share in the next election.
+  
+**This visual confirms our statistical finding: Incumbency is a noticeable advantage.**
+
+<div class="instructor-note">
+## **Critical Instructor's Note: **
+
+Before we estimate our model, there's a crucial concept you have to understand: **the sign of your treatment coefficient can appear backwards depending on which side of the cutoff receives treatment.**
+
+This isn't just an abstract concern — in your lab, the treatment group (summer school students) is **below** the cutoff, which is the opposite of our Senate example where the treatment group (winners) is **above** the cutoff. Let's make sure you understand how to interpret coefficients correctly in both scenarios.
+
+### The Two Possible Setups
+
+**Setup A: Treatment ABOVE the Cutoff (Our Senate Example)**
+
+- Candidates who score **above** 0% margin WIN and become incumbents
+- Treatment group is on the **right** side of the graph
+- Control group is on the **left** side
+
+
+**Setup B: Treatment BELOW the Cutoff (Your Lab - Summer School)**
+
+- Students who score **below** 60 attend summer school
+- Treatment group is on the **left** side of the graph
+- Control group is on the **right** side
+
+
+### How `lm()` Handles This
+
+When you use `lm()` with a treatment dummy variable, the coefficient on `treat` always measures:
+
+$$\beta_1^{lm} = \text{(Treatment group outcome at cutoff)} - \text{(Control group outcome at cutoff)}$$
+
+This is intuitive:
+
+- **Positive $\beta_1$** - Treatment group does **better** - Treatment helped
+- **Negative $\beta_1$** - Treatment group does **worse** - Treatment hurt
+
+This interpretation holds **regardless of which side of the cutoff has the treatment group**. The `lm()` function respects your dummy coding.
+
+
+### How `rdrobust()` Handles This — Important!
+
+The `rdrobust()` function does **NOT** use your treatment dummy variable. Instead, it **always** calculates:
+
+$$\text{RD Effect} = \text{(RIGHT side of cutoff)} - \text{(LEFT side of cutoff)}$$
+
+This is a critical distinction! The `rdrobust()` function doesn't know or care which side you consider treatment. It simply compares the right side to the left side at the cutoff.
+
+**What this means in practice:**
+
+Treatment **ABOVE** cutoff (Senate):  Treatment - Control = Coefficient is **POSITIVE** 
+Treatment **BELOW** cutoff (Summer School): Control - Treatment = Coefficient is **NEGATIVE**
+
+### Why This Matters for Your Lab
+
+In your lab, students who scored **below** 60 attended summer school. If summer school **improves** GPA:
+
+- Using `lm()`: You'll get a **positive** treatment coefficient (Treatment - Control > 0)
+- Using `rdrobust()`: You'll get a **NEGATIVE** coefficient (Right - Left = Control - Treatment < 0)
+
+**Both results indicate the same thing — that summer school worked!** You just need to interpret them correctly.
+
+### Visualizing the Difference
+
+Let's see this visually with two scenarios where treatment **helps** in both cases:
+
+```{r, fig.width=12, fig.height=5, echo=FALSE}
+par(mfrow = c(1, 2))
+
+# Setup A: Treatment ABOVE cutoff (like Senate)
+set.seed(123)
+x_control <- seq(-10, 0, length.out = 50)
+x_treat <- seq(0, 10, length.out = 50)
+
+y_control <- 45 + 0.5 * x_control + rnorm(50, 0, 2)
+y_treat <- 52 + 0.5 * x_treat + rnorm(50, 0, 2)  # Treatment is HIGHER
+
+plot(x_control, y_control, 
+     xlim = c(-10, 10), ylim = c(35, 65),
+     pch = 19, col = "salmon",
+     xlab = "Running Variable (centered)", 
+     ylab = "Outcome",
+     main = "Setup A: Treatment ABOVE Cutoff\n(Like Senate Elections)")
+points(x_treat, y_treat, pch = 19, col = "lightblue")
+
+
+# Add fitted lines that STOP at the cutoff
+# Control line: from x = -10 to x = 0
+segments(x0 = -10, y0 = 45 + 0.5 * (-10), 
+         x1 = 0, y1 = 45 + 0.5 * 0, 
+         col = "darkred", lwd = 3)
+
+# Treatment line: from x = 0 to x = 10
+segments(x0 = 0, y0 = 52 + 0.5 * 0, 
+         x1 = 10, y1 = 52 + 0.5 * 10, 
+         col = "darkblue", lwd = 3)
+
+text(0, 40, "rdrobust: +4\n(Right - Left)", cex = 1.1, font = 2, col = "forestgreen")
+text(0, 35,"Treatment: 50 - Control: 46", cex = 1.1, font = 2, col = "forestgreen")
+
+# Labels
+text(-7, 60, "CONTROL\n(Left Side)", col = "darkred", font = 2)
+text(7, 60, "TREATMENT\n(Right Side)", col = "darkblue", font = 2)
+
+
+# Setup B: Treatment BELOW cutoff (like Summer School)
+y_treat_b <- 52 + 0.5 * x_control + rnorm(50, 0, 2)  # Treatment on LEFT, HIGHER
+y_control_b <- 45 + 0.5 * x_treat + rnorm(50, 0, 2)  # Control on RIGHT, LOWER
+
+plot(x_control, y_treat_b, 
+     xlim = c(-10, 10), ylim = c(35, 65),
+     pch = 19, col = "lightblue",
+     xlab = "Running Variable (centered)", 
+     ylab = "Outcome",
+     main = "Setup B: Treatment BELOW Cutoff\n(Like Summer School Lab)")
+points(x_treat, y_control_b, pch = 19, col = "salmon")
+
+
+# Add fitted lines that STOP at the cutoff
+# Treatment line (LEFT side): from x = -10 to x = 0
+segments(x0 = -10, y0 = 52 + 0.5 * (-10), 
+         x1 = 0, y1 = 52 + 0.5 * 0, 
+         col = "darkblue", lwd = 3)
+
+# Control line (RIGHT side): from x = 0 to x = 10
+segments(x0 = 0, y0 = 45 + 0.5 * 0, 
+         x1 = 10, y1 = 45 + 0.5 * 10, 
+         col = "darkred", lwd = 3)
+
+# Arrow showing the jump (going DOWN from left to right)
+text(0, 40, "rdrobust: -4\n(Right - Left)", cex = 1.1, font = 2, col = "forestgreen")
+text(0, 35,"Control: 46 - Treatment: 50", cex = 1.1, font = 2, col = "forestgreen")
+
+# Labels
+text(-7, 60, "TREATMENT\n(Left Side)", col = "darkblue", font = 2)
+text(7, 60, "CONTROL\n(Right Side)", col = "darkred", font = 2)
+```
+
+**In both graphs, treatment helped by 4 points.** But notice:
+
+- **Setup A (left graph):** The jump goes UP from left to right, so `rdrobust()` returns **+4**
+- **Setup B (right graph):** The jump goes DOWN from left to right, so `rdrobust()` returns **-4**
+
+The treatment effect is the same magnitude — the sign just reflects which direction you're jumping/falling when moving from left to right across the cutoff.
+
+### The Golden Rule: Plot to Verify Your Interpretation
+
+If you're ever unsure whether your `rdrobust()` coefficient makes sense, **plot it using `rdplot()`**. This is the most reliable way to verify your interpretation.
+
+Remember: `rdrobust()` always calculates **RIGHT minus LEFT**. So when you look at your `rdplot()` output, ask yourself:
+
+> "If I start on the LEFT side and move to the RIGHT side at the cutoff, does the outcome go UP or DOWN?"
+
+- If it goes **UP** (right side is higher), `rdrobust()` returns a **positive** coefficient
+- If it goes **DOWN** (right side is lower), `rdrobust()` returns a **negative** coefficient
+
+Then connect this to your research question:
+
+- Which side is your **treatment** group on?
+- If treatment is on the **higher** side at the cutoff, treatment **helped**
+- If treatment is on the **lower** side at the cutoff, treatment **hurt**
+
+The visual from `rdplot()` never lies — it shows you exactly what's happening at the cutoff. The coefficient sign is just a consequence of the package's right-minus-left convention.
+
+</div>
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+ 
+## Comparing lm() vs rdrobust()
+
+Let's put our estimates side by side:
+
+```{r}
+cat("Comparison of Estimation Approaches:\n\n",
+    "Method          | Treatment Effect | Notes\n",
+    "----------------|------------------|---------------------------\n",
+    sprintf("lm() with RDD   | %.2f             | Uses all data\n",
+            coef(rdd_interaction)["treat"]),
+    sprintf("rdrobust()      | %.2f             | Optimal bandwidth, robust SE\n",
+            rd_model$coef[1]))
+```
+
+Notice how the `lm()` and `rdrobust()` estimates are kind of close to each other, but both are much smaller than the naive estimate we saw at the beginning when we ran the t-test? That's because the naive estimate was contaminated by selection bias - good candidates both win AND do well next time.
+
+**Which should you trust?** For inference, use `rdrobust()`. It's designed specifically for RDD and handles all the technical details correctly.
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+
+# Understanding the Counterfactual
+
+## What Would Have Happened?
+
+The power of RDD is that it lets us answer counterfactual questions. For a candidate who barely won, we can estimate what their next-election performance would have been if they had barely lost instead.
+
+<div class="instructor-note">
+**Instructor's Note:**
+
+We will use the coefficients from your `lm()` model in the following section. While `rdrobust()` gives a more accurate final estimate, the `lm()` model provides simple linear coefficients ($y = \beta_0 + \beta_1 x$) that make the logic of the counterfactual easier to see mathematically. **We will use the naive (biased) version for simplicity and to match your lab.
+
+Using our `lm()` coefficients, let's walk through this:
+
+</div>
+
+```{r}
+# Predicted vote share for a LOSER at the cutoff (margin = 0)
+# Treatment = 0, margin = 0
+# Simplifies to just b0
+predicted_loser <- b0 + b1 * 0 + b2 * 0  
+
+# Predicted vote share for a WINNER at the cutoff (margin = 0)
+# Treatment = 1, margin = 0
+# Simplifies to b0 + b1
+predicted_winner <- b0 + b1 * 1 + b2 * 0  
+
+
+# What is the predicted vote share for a winner, that won by 5% margin?
+adhoc <- b0 + b1 * 1 + b2 * 5
+
+# what is the predicted vote share for a loser that lost by 8% margin?
+adhoc_2 <- b0 + b1 * 0 + b2 * -8
+
+adhoc_2
+
+cat("Counterfactual Analysis at the Cutoff:\n\n",
+    "A candidate who BARELY LOST (margin ~ 0):\n",
+    "  Predicted next-election vote share:", round(predicted_loser, 2), "%\n\n",
+    "A candidate who BARELY WON (margin ~ 0):\n",
+    "  Predicted next-election vote share:", round(predicted_winner, 2), "%\n\n",
+    "The difference (Treatment Effect):\n",
+    "  ", round(predicted_winner, 2), "-", round(predicted_loser, 2), "=", 
+    round(predicted_winner - predicted_loser, 2), "percentage points\n")
+```
+
+This confirms that our treatment coefficient ($\beta_1$) is exactly the difference in predicted outcomes at the cutoff - the causal effect of winning.
+
+## The Local Average Treatment Effect (LATE)
+
+There's an important caveat: our treatment effect estimate is **local** to the cutoff. We've estimated the incumbency advantage for candidates in close elections (those right around a `margin` of 0).
+
+This might not be the same as the incumbency advantage for candidates in landslide elections. A candidate who won with 70% of the vote might experience a different incumbency boost than a candidate who won with 50.1%.
+
+RDD gives us the **Local Average Treatment Effect (LATE)** - the effect for observations right at the cutoff. This is still incredibly valuable, but be careful about generalizing to the entire population.
+
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+
+# Checking Assumptions
+
+RDD requires certain assumptions to hold. Let's check the most important ones.
+
+## Is Our Design Actually Sharp?
+
+In a sharp RDD, the cutoff perfectly determines treatment. Let's verify this by plotting treatment status against the running variable:
+
+```{r, fig.width=8, fig.height=5}
+# Plot treatment status against margin
+plot(senate$margin, senate$treat,
+     pch = 19,
+     col = rgb(0.2, 0.2, 0.6, 0.3),
+     xlab = "Vote Margin (%)",
+     ylab = "Won Election (Treatment)",
+     main = "Checking for Sharp RDD: Treatment Status by Running Variable",
+     yaxt = "n")
+axis(2, at = c(0, 1), labels = c("Lost (0)", "Won (1)"))
+abline(v = 0, col = "#8C1D40", lwd = 2, lty = 2)
+```
+
+Perfect! Everyone with margin > 0 has treatment = 1 (won), and everyone with margin < 0 has treatment = 0 (lost). This is exactly what a sharp RDD should look like - a clean step at the cutoff.
+
+If we saw gradual change (some winners below the cutoff, some losers above), that would indicate a fuzzy design requiring different methods.
+
+## Could People Manipulate Their Score?
+
+A key assumption of RDD is that people can't precisely control which side of the cutoff they land on. If they could, the local randomization logic breaks down.
+
+For elections, manipulation would mean candidates can precisely control their vote share to land just above 50%. This is unrealistic - elections involve millions of voters and lots of uncertainty.
+
+One way to check for manipulation is to look at the **density** of the running variable around the cutoff. If people are manipulating, we'd expect to see bunching just above the cutoff (everyone trying to barely win).
+
+```{r, fig.width=10, fig.height=5}
+# Histogram of margin around the cutoff
+hist(senate$margin[senate$margin > -30 & senate$margin < 30],
+     breaks = 30,
+     main = "Density of Vote Margin Near Cutoff",
+     xlab = "Vote Margin (%)",
+     col = "lightblue",
+     border = "white")
+abline(v = 0, col = "#8C1D40", lwd = 2, lty = 2)
+
+# Add annotation
+text(15, 40, "If manipulation were occurring,\nwe'd see bunching just above 0", 
+     col = "#8C1D40", font = 2)
+```
+
+The distribution looks fairly smooth around the cutoff - no obvious spike just above 0. This supports the assumption that candidates aren't manipulating their vote shares.
+
+<div class="instructor-note">
+**Instructor's Note:**
+
+For a more formal manipulation test, researchers use the "McCrary density test" which statistically checks for a discontinuity in the density at the cutoff. The `rddensity` package (by the same authors as `rdrobust`) implements this. For our purposes, a visual check with a histogram is sufficient.
+</div>
+
+## Other Threats
+
+A few other things to consider:
+
+1. **Are there other policies that change at the same cutoff?** If something else changes exactly at 50% (besides incumbency status), we can't isolate the effect of incumbency alone.
+
+2. **Is the relationship really continuous away from the cutoff?** RDD assumes that without the treatment, the outcome would be continuous at the cutoff. If there's some other reason for a "jump," our estimate is contaminated.
+
+For the Senate data, these concerns seem minimal. The 50% threshold only affects who wins - there's no other policy that kicks in at exactly that point.
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+
+# The Final Verdict
+
+## Summary of Findings
+
+```{r, results='asis'}
+# Display parallel lines model & interaction model
+stargazer(rdd_lm, rdd_interaction,
+          #type = "text",
+          type = "html",
+          title = "Comparison: Naive Model vs. RDD Model",
+          column.labels = c("Naive", "RDD"),
+          dep.var.labels = "Vote Share in Next Election",
+          covariate.labels = c("Won Election (Treatment)", "Vote Margin"),
+          omit.stat = c("f", "ser"),
+          digits = 2)
+```
+
+```{r}
+# Display rdrobust model
+summary(rd_model)
+```
+
+
+
+```{r}
+
+cat("\nFinal Results Summary:\n\n",
+    "Research Question: Does winning a close election give incumbents an advantage?\n\n",
+    "RDD Estimate (rdrobust):", round(rd_model$coef[1], 1), "percentage points\n", 
+    "  95% CI: [", round(rd_model$ci[3,1], 1), ",", round(rd_model$ci[3,2], 1), "]\n\n",
+    "Conclusion: Yes! Winning a close Senate election causes approximately a\n",
+    round(rd_model$coef[1], 0), "-percentage point boost in the next election's vote share.\n\n",
+    "This is the 'incumbency advantage' and it's statistically significant.\n")
+```
+
+
+
+## The RDD Workflow
+
+<div class="instructor-note">
+**The RDD Workflow (Use This for Your Lab):**
+
+1. **Understand the setting** - What's the cutoff? What's the running variable? Is it sharp or fuzzy?
+
+2. **Create your variables** - Treatment indicator, centered running variable
+
+3. **Run the naive comparison** - Show why simple group comparison is misleading
+
+4. **Run `lm()` model** - Understand the mechanics and interpret coefficients
+
+5. **Run `rdrobust()` model** - Get proper estimates with optimal bandwidth
+
+6. **Check bandwidth sensitivity** - Does your result hold across different bandwidths?
+
+7. **Visualize with `rdplot()`** - Show the discontinuity graphically
+
+8. **Check assumptions** - Sharp design? No manipulation? No other discontinuities?
+
+9. **Interpret the LATE** - Your estimate is local to the cutoff
+</div>
+
+## Key Takeaways
+
+1. **RDD exploits cutoff-based assignment** - When treatment is determined by whether you're above or below a threshold, we can estimate causal effects by comparing people right at the cutoff.
+
+2. **Near the cutoff, treatment is as-if random** - A candidate who got 50.1% vs 49.9% are essentially identical except for treatment status.
+
+3. **Use `lm()` to understand, `rdrobust()` to publish** - The basic `lm()` model helps build intuition, but `rdrobust()` handles bandwidth selection, bias correction, and proper inference.
+
+4. **Always check bandwidth sensitivity** - Your results should be stable across reasonable bandwidth choices. If they're not, be skeptical.
+
+5. **RDD estimates are local** - The treatment effect applies to observations at the cutoff. Be cautious about generalizing to the full population.
+
+6. **Check your assumptions** - Verify sharp assignment, look for manipulation, consider other discontinuities.
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">

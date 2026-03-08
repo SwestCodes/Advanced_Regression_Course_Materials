@@ -1,0 +1,1208 @@
+Hello, class.  Welcome to Module 3.
+
+This week we will be discussing fixed effects models.
+
+At this point, you should have completed all of the lecture reading materials, and there's some supplemental materials you could have gone through as well.
+
+The code through will simply serve as a springboard to help you complete your lab and understand how you can actually accomplish or facilitate a fixed effect model if you have a data set ready to go.
+
+This week we will be working a lot with our knitted file.
+
+We have our lecture.
+
+Excuse me, pardon me, getting mixed up here with my different tabs.
+
+Have our lecture material, we have our code through material and then we're going to look through.
+
+I have just a note for everybody on how to interpret your beer taxes coefficient.
+
+So we're going to touch on that.
+
+So we'll work mostly out of our knitted file today, going back occasionally to our RMD just to see any underlying code.
+
+And I like for students to see how to incorporate some different styling into your RMDs, different line breaks, things like that inline latex, which is really helpful for producing really clean code.
+
+All right, well, I'll stop yammering and let's get on to the actual point of this video.
+
+So fixed effects, once again, you'll come in ready with the lecture content completed.
+
+As you recall from the other videos, this is simply the styling content.
+
+Our CSS here, as always, we do have the note when it comes through.
+
+Forgive me, I'm in the template again.  Too many tabs.
+
+The Let me jump back over here.
+
+It's once again the css.
+
+Now we're on the right page.
+
+Let's overview what we're going to tackle today.
+
+So we're going to recap what we've already discussed.
+
+So we're going to talk about interrupted time series, when to use them, difference in difference, when to use that type of model.
+
+And then we're going to summarize fixed effect models, when to use them, when it's appropriate.
+
+We're going to move on to talk about the core concept of fixed effects, that being heterogeneity bias.
+
+Once again, that's just differences within our groups going into Simpson's paradox, talking about how if we aggregate up too high, then we lose a lot of meaning and we can actually over underestimate or completely improperly estimate our effects.
+
+So Simpson's paradox once again is just over aggregating our data in such a way that we do not pay close attention to very important group level differences.
+
+That's heterogeneity bias.
+
+And we're going to Talk about the between versus within variation, which you should have already read about in the lecture materials, we will go ahead and do similar to what the lecture materials did, but on a data set that's available.
+
+So if you wish to go through this on your own, you're more than welcome to.
+
+We're going to do a pulled model.
+
+That's the naive approach.
+
+So that is the simplest way of approaching a regression without tackling the context of the data that's necessary to determine what the best model is.
+
+So our very basic pulled model, our naive approach, we're going to run a fixed effects model with the LM function using dummy variables.
+
+And then we're going to run a fixed effects model with the PLM function, the panel linear model function.
+
+And this really is the professional standard.
+
+So in the, in the lecture it talks about you can use both.
+
+This really is the route you're going to want to go.
+
+So if you go forward and do any fixed effect model evaluations in your future, or even if you do it in your final class as part of this program, this is the, this is the route you would want to go as using plm.
+
+And then we're going to go ahead and test whether our fixed effect model is better than our pulled model using PF test.
+
+We're going to look through how to retrieve those fixed.
+
+Sorry, with fix effect.
+
+Fix effect, I say it fix EF function for pulling out those intercepts from our PLM model because it won't automatically populate those in our Stargazer table.
+
+And then we're going to go through looking at the interpretations of each of those coefficients.
+
+And this here is a really important note that I'm going to talk about later in this code through where I explain how to interpret beer taxes for your lab.
+
+Your lab looks at a policy variable being beer taxes and interpreting it can be tricky and kind of confusing technically if you do it at its face, it just doesn't really make helpful sense.
+
+All that to say I'm going to give you some guidance on how to do, how to properly interpret that coefficient.
+
+So now demeaning, we're actually going to go through the process of demeaning and then compare that to what it looks like with our PLM and our LM model with fixed effects.
+
+And then we're going to talk about some time invariant variables.
+
+Just to recap what we go over, a lot of this is going to be what you learned in the lecture, just kind of putting pen to paper, as some may say, seeing how everything works.
+
+So for Some of this I'm going to actually jump back to our code through it just looks a little cleaner.
+
+So we have the organization of everything we've gone through thus far, talking about the data structure that we should, we should have when we use it, the key requirements for using it, and then just touching on the counterfactual.
+
+So to start interrupted time series, that was module one, that was a reflexive study in nature.
+
+So an interrupted time series is looking at really two things.
+
+One group with many data points over time, time series data, and it has a clear intervention point that's going to be the interrupted element of this.
+
+It happens at one time.
+
+If you remember from our lab, we had a new bus schedule go into effect some point in a 365 day period and we were able to see the pre intervention trend, the post intervention trend, how it changed, as well as the immediate effect of that new bus schedule.
+
+And when we're looking at the counterfactual for this type of model, we're going to be using the pre treatment trend of the group that we're looking at.
+
+Again, we don't have a control, we just have the treatment group.
+
+Therefore it is a reflexive study and we will be doing a pre treatment trend as our counterfactual.
+
+Now for difference in difference, we do have the treatment group, we have the control group, we have a pre and a post period.
+
+We're going to be utilizing the control group and its trend to assume that that is the same trend that the treatment group will follow had intervention not occurred.
+
+And that's going to be important.
+
+If we're looking at these, these, these two distinct groups, we have a pre and post and we have strong, under strong suspicion or we can reasonably assume that the parallel trends assumption will hold.
+
+Again, we do that by looking at the pre intervention slopes of both groups and we can see if it is generally parallel.
+
+And support using supporting theory as well, we can argue why parallel trends assumption holds.
+
+Now, what we've learned thus far via lecture and what we will go through in the code through here, the fixed effect model is going to be when we have mini groups, essentially time series data for, but instead for one group, we have it for many groups multiple points in time.
+
+So time series data is going to be composed of data points over time.
+
+In our fixed effect model it's going to be the same, but it's going to be many data points for many different groups at many different points in time.
+
+And we're going to be looking at the within group variation in our x so within our groups we want to see our changing over time within each group.
+
+So each group is going to be self contained, essentially where we can see, observe the changes within each group, controlling again for all of those time invariing characteristics.
+
+And each group is going to be representing its own counterfactual.
+
+So really, when is fixed effects going to be the most appropriate?
+
+When you have data that is arranged as panel data, meaning again, we have different entities with observations over time.
+
+So we have multiple people, multiple states, multiple groups of some kind, with many observations over time.
+
+And fixed effect again is really great.
+
+This is where it really shines when you're worried about unobserved heterogeneity.
+
+If we're worried about time and varying characteristics affecting the outcome of our treatment or being potentially confounding, we want to make sure that we can utilize fixed effect for controlling those things.
+
+And then also we know that the policy variable, or excuse me, we want the policy variable to change over time.
+
+Or we can infer that the policy variable will change over time within entities.
+
+Unlike the interrupted time series which has a single clear intervention point or like difference in difference that has an intervention period, in this case it could occur over many different points in time, different for each group, which we'll actually see here shortly.
+
+In our data set, we're looking specifically at workers who joined the labor union and whether or not being a part of the union increased their wages.
+
+And we'll see that many different people joined at different points in time.
+
+I was going to go to a visualization, but it's too far down.
+
+We'll just get to it when we get to it.
+
+So super important when we're talking about the fixed effects model, we're looking at the changes within each group, holding all time invariant characteristics constant or controlling for all of those.
+
+And so instead of comparing the groups across, across group, we're going to be staying within group.
+
+So we're not looking at State A versus State B.
+
+We're looking at State A versus State A, State B versus State B, etc.
+
+So now going on to what we're doing in our code through our question here is does membership, union membership, excuse me, increase wages?
+
+The hypothesis is that union membership does increase wages when we control for individual characteristics.
+
+So we're going to be using the wagepan data set.
+
+This is available in the Wooldridge package.
+
+We have a lot of data sets that are available in the Wooldridge package.
+
+It makes it really great for playing with, experimenting with different models, refining them, etc.
+
+So I encourage you to play around with that.
+
+And this is going to be using panel data on income dynamics and we have 545 individuals and that's going to be eight observations.
+
+Excuse me, observations over eight years, giving us a total of 4,360 observations.
+
+One thing that you might not be super familiar with and it may be a little confusing in this code through, but don't feel overwhelmed by it is, is our outcome variable is wages, but we use logged wages and I'll explain that a little later why.
+
+But it helps to normalize the data and make sure that our regression assumptions hold true.
+
+And that's why we log it.
+
+So it looks a little different.
+
+It doesn't technically represent real wages, but we'll get into that a little bit later.
+
+And then again, our policy variable is simply going to be union membership, which is a binary flag.
+
+It can be on one year and off the next year on again.
+
+So it's something that will change year over year or can change year over year.
+
+We'll be using the Wooldridge package to pull in our data PLM for our PLM model, Stargazer as normal the plier for some manipulation we have to do.
+
+And then we use LM test and sandwich for getting what's called clustered standard errors.
+
+Very important.  It doesn't cover it in the lecture materials.
+
+But like we saw in interrupted time series autocorrelation generally exists with time series data which essentially panel linear or panel data is time series data for multiple groups over time.
+
+So we need to check for autocorrelation in our model and we should adjust for it using what's called clustered standard errors.
+
+It's really important to note this is not in the lecture, but we are covering it here and it's something that you should be aware of.
+
+So please make sure you, you tune in for that.
+
+Now let's look at our data.
+
+So we just do data wage pan here.
+
+We're going to look at the structure of our data and we're just going to go ahead and subset a few of these columns, which are the columns we want.
+
+There's quite a few more, but this is all we're going to look at for now.
+
+To break it down, we have NR or you can just call it number.
+
+I don't technically know what it stands for, but I call it number.
+
+And we have for every person in the group we have a personal identifier.
+
+So 13 is going to be the number that represents the person.
+
+It is their unique ID.
+
+And we have eight 13s which again we have eight observations for person 13, and then we have 17 as the next personal identifier.
+
+And that's going to be eight observations going forward.
+
+So let's say look at person 13.
+
+We're going to look at them in the first year of observation period, that's 1980.
+
+Our logged wages for this person is 1.2.
+
+They are not in the union, they are not married, they have 14 years of education, they are not black, and they have one year of experience.
+
+Looking at that same person again, 13 in year 1981, their logged wages are 1.85.
+
+In the second year of observation, they are in the union.
+
+This year, they're not married still.
+
+Education remains the same, they are not black still, and they are two years of experience.
+
+So something to note here is first, we have some variables that will remain constant over time.
+
+Obviously, black is one of those where it makes sense somebody's not going to become black if they were not black over time.
+
+So that is a time invariant characteristic.
+
+We'll talk more about why that's important.
+
+One that I want to really call out that could be confusing is education.
+
+Now, if you think that we're measuring people eight over each year, excuse me, once per year over eight years, that something like education could actually change over that time, somebody decides to go back to school, get their bachelor's degree, their master's degree, just do some community college, whatever it is, there could be a very reasonable argument for education to change over time.
+
+One important caveat you should be aware of, and we'll see it in action later, is that in this data set, education remained constant across all people, across all periods.
+
+So for person 13, like we're seeing here, they remained with the same amount of education across the entire observation period.
+
+That is going to be the same for every single other individual in this data set.
+
+So something to keep in mind there.
+
+And then I also mentioned too obviously marriage, people can get married, people can get divorced.
+
+So of course marriage can be.01 canceled out.
+
+Now, union, though, union is not.
+
+You're in it and you're in it for life.
+
+Union is, you can be in it one year, you're out of it the next year, in it one year out of it the next year.
+
+So it is something that can change year over year.
+
+So something super important to keep in mind moving forward.
+
+Let's look at some more of the data.
+
+Well, I'll just explain the code and then we'll move forward because we looked at this data already for person 13, so we're going to use Diplier, we're going to pipe from Wagepan, our data set.
+
+We're going to filter down to just look at person 13, 17 and 45, and we're going to select those columns we want to look at and just look at the first, first 15 rows.
+
+So we see a little bit more about person 17, but we see everything in person 13 we already looked at.
+
+Now let's go ahead and do a summary here.
+
+We're going to look at the summary statistics of these same columns.
+
+Excuse me, these same fields, and we have just the summary data there.
+
+We won't go into that too much.
+
+Couple things just to summarize, personal identifier, we already went over that.
+
+The year that's going to represent the year between 1980 to 1987, the log of the hourly wages.
+
+And we're also asking, are these things time and varying?
+
+Their personal identifier, their year?
+
+We're not worried about those there because obviously this one changes.
+
+It doesn't change over time, but this one will.
+
+But being that those are our time variable and that our individual variable, we're not worried about those.
+
+Now we're going to look at the union membership.
+
+This is either one or.
+
+Yes, as we saw that this does change over time.
+
+Like we saw with person 13.
+
+Marriage does change over time.
+
+You could be married one year, you might not be married the next year.
+
+Years of work experience, of course that grows over time.
+
+Now, as I already mentioned, education, which you might think would not be time and varying, which it generally, you wouldn't consider education to be time and varying depending on your subset that you're working with.
+
+In this case, it for sure is not time varying.
+
+Same with being black, same with being Hispanic.
+
+Those are not time varying and sorry, I may have said that incorrectly.
+
+Education, depending on your subset of the population you're working with, you most likely would not assume that education is time in the varying meaning that you would expect.
+
+Education is something that would vary over time or very well could vary over time.
+
+In case I said that wrong.
+
+In this case, it is not time invariant.
+
+Pardon me, it is time invariant.
+
+It does not vary over time.
+
+Okay, moving on again.
+
+We already talked about how education, Black, Hispanic, those are time invariant.
+
+They do not change over time.
+
+That's going to be important later.
+
+And then two, the thing that I mentioned earlier, prefaced earlier, is logged wages.
+
+Why do we use logged wages?
+
+What is that change make in terms of how we interpret our coefficients?
+
+Logged wages, generally, if you're working with wage data, it's going to be right Skewed, meaning that if you were to plot a histogram of it, you would have a lot fewer in your bins on the right side, so higher income than you do in the middle and on the left, because we have usually a lot more people making less money or average money than we do people making a lot of money.
+
+Just think about the general status quo of the distribution of wealth in America, highly concentrated in terms of volume of poor people or average people on the left, and then just a few billionaires, multi, multi millionaires, et cetera.
+
+And so it really right, skews the data.
+
+All that to say one of the assumptions with OLS that needs to hold true is that we would have a more normal distribution and therefore logging the wages creates a normal distribution for us to hold true to those model assumptions.
+
+Now, how does this affect our interpretation of the coefficients?
+
+So because our outcome variable is logged, our coefficients are now going to be representing a percentage change, not an actual dollar change.
+
+So let's say our coefficient is 0.1.
+
+That doesn't mean 10 cents.
+
+That actually is represented as a 10% change in wages.
+
+So if wages, or excuse me, if our coefficient is 10%, then that means that for a one unit change in whatever our variable is, then we would expect to see a 10% increase in wages.
+
+So really important, and not to throw more at you, but this is not technically 100% accurate, but it's pretty darn close when we're working with small numbers like we'll be working with.
+
+I have one other note later on that explains technically how you can go from logged to real wages.
+
+Okay, so jumping in heterogeneity bias, that's the whole point of fixed effects.
+
+We have multiple different groups.
+
+All of these groups have some group level characteristics that make them different.
+
+Therefore, when we put them all together and we try and create a single trend or a single slope through all of them where we could really mix some things up.
+
+Just like we saw in the lecture.
+
+If we get down to something like this, we have three different groups.
+
+But if we code all these as the same, we might see a very different slope than what we would see if we group them all together.
+
+We group them in the wrong way.
+
+And so when we talk about heterogeneity, we're talking about those differences between groups that could even be something like motivation, someone's personal ability, or even their career ambition.
+
+Those are unobserved.
+
+That's unobserved heterogeneity.  Excuse me.
+
+We can also talk about how our heterogeneity bias could be correlated with our policy variable.
+
+So more motivated people might be the ones who join the unions.
+
+And so we have some bias there, some a selection bias where we have people who are more motivated to be successful and therefore join the unions to be more successful.
+
+So we have some selection bias that might occur there.
+
+And then with wages too.
+
+It could also be in the reverse where this heterogeneity is correlated with our wages, where we have people who are simply motivated and in lieu of joining the, the unions, they're just more scrappy, they're more out there, go get them, I guess you could say, and they earn higher wages.
+
+So this heterogeneity bias, when not accounted for, can create again, inaccurate estimates.
+
+And so we want to.
+
+Not if we ignore it, pardon me, we want.
+
+We might incorrectly attribute the higher wages to union membership when they're actually due to these, these unobserved traits.
+
+And this is where fixed effects comes in.
+
+So when we're talking about between variation, that's again, if we have person A and we're comparing them to person B, like in a diff.
+
+In diff, person A, let's say, averages $20 an hour, where person B averages 15 an hour.
+
+This variation is confounded by all the ways that A and B differ.
+
+Again, going back to individualistic individual traits, things like that.
+
+When we're talking about within group variation, we want to say, well, okay, so person A, how did they change over time?
+
+In our case, between 1980 and 1987, I believe is our data set.
+
+But let's say we want to see how they change between 1980 and 1985 or in 1980 versus 1985.
+
+We can look at that person and we can say person A earned $18 an hour before joining the union, then $22 an hour after joining the union.
+
+Now this, this looking within variation is able to hold all of those personal characteristics constant in order to better assess the income of, or excuse me, the impact of our policy variable.
+
+So the variation within this person is held constant because person A doesn't change.
+
+At least those, those time and varying characteristics do not change.
+
+And therefore fixed effects holds that constant and gives us a better assessment of our effect.
+
+Okay, so now we're going to go ahead and visualize all of our data.
+
+So we're going to go ahead and use the wagepan data set.
+
+We're going to pipe, bringing it into a group by.
+
+So we're going to group by our individual identifier there.
+
+And then we're going to summarize to get the mean of our union.
+
+Because once again, every year you can be in the union or out.
+
+So we have basically a proportion of all the eight years where you in the union zero times eight times.
+
+Zero times through eight times.
+
+And then we have the mean wage data, excuse me, the mean of the logged wages.
+
+And then we're going to find the max of the union just telling us if they ever were in the union for each person.
+
+And then we're going to drop that group there and go ahead and plot it.
+
+So we have on the bottom here, not to get confusing, on the bottom we have a proportion.
+
+So our average union membership is binary.
+
+So every year it could be 0 or 1.
+
+And then we have those observations over time.
+
+So we have 19, 80, 81, 82, 83, 84, 85, 86 and 87.
+
+And then of those we can have, you could be in the union zero times.
+
+So actually let's, let's look at it this way.
+
+So if we're in the union 0 of 8, we fall into this proportion of never in the union zero here.
+
+So every single dot represents a single person in our data set.
+
+So I believe it's 545 dots and their average union membership over the eight years and then their average logged wages over the eight years.
+
+So we can see here the distribution for those who are never in the union.
+
+We can see the min, the max, almost like we're looking at some box and whisker plots with just the distribution here.
+
+For those that were in the union one year of the eight years, we can see their distribution.  Those.
+
+And that's what I was going to show you.
+
+So if we were in the union one of eight years, our proportion of total union membership during that time would be 12.5%.
+
+It doesn't show explicitly, but that's what this represents.
+
+Those in the union one of 12, or sorry, one of eight, putting them at 12 and a half percent total time in the union and those in the for two out of the eight years, three out of the eight years, four out of the eight years, etc.
+
+And this is our pooled model.
+
+It's not quite as clean as and straightforward as the ones we saw in the fixed effects lecture, those that we saw in the replicating of research or sorry, replicating.
+
+What is it called?  I can't even think of it.
+
+Forgive me, I'm blanking on it.
+
+Replication of a study.
+
+Here we go.  We were able to use some of these have a nice continuous X and a continuous Y which created a Nice clean visual.
+
+We have a binary for this data set and so this is what we're working with.
+
+This is our use case for a pulled model visualization with a binary policy variable.
+
+All right, so moving on, recall that a pooled model, it's when we're not accounting for group membership.
+
+And so this looks a little different than the model that you saw in the lecture because that really just accounted for it was just what's the effect of the policy variable on the outcome variable.
+
+In this model we're still including our policy variable and we're also including some additional control.
+
+So experience, marriage, education, black those are not Notice none of these have a factor for our individual identifier are in R. So even though this includes controls, this is still a pooled model because it is not looking at the group level differences, meaning we are not factoring in are in our variable.
+
+So still considered a pooled model.
+
+But it looks a little different than the ones you saw in the lecture material.
+
+So we save all of our we save our model to it pulled OLS object utilizing Stargazer.
+
+I'm going to call it out again.
+
+Anytime you use intercept dot bottom equals false where Stargazer will default to have your constant on the bottom.
+
+This will default it to put it on top of.
+
+And then if you're using the covariate labels, you need to be very cognizant that your variables will account for that.
+
+So if you were to just say, well, I have union first, so I need to put union here, experience there.
+
+And then you forget you put an intercept bottom, you will actually flag your aggregate baseline.
+
+So your polled baseline as your union membership.
+
+This would be your policy variable coefficient and that would give you a very different read and ultimately incorrect read.
+
+And then as always, make sure you set your tables or your Stargazer code chunks to result equal as is.
+
+And make sure before you know, you set it to HTML.
+
+So keep that in mind if you decide to go this route.
+
+So if we're looking at our pulled model, our average baseline across the board of logged wages is 0.031.
+
+Union membership is huge.
+
+We're working with logged wages.
+
+And so again we interpret our coefficient as a percentage change.
+
+So being in the union according to our pooled model is saying that we would increase our wages by the tune of 18.5% nearly and that is highly statistically significant.
+
+That's a huge increase, a huge raise for being in the union.
+
+You would think people would just be rushing to join the union at that kind of a pay Increase.
+
+Now, experience, we see that there is a statistically significant.
+
+What is that?  A 5% increase in wages for every additional year.
+
+Because again, this is continuous, this is in years.
+
+So for every additional year of experience, we're estimating that there would be a 5% increase in wages.
+
+Increase in logged wages.
+
+Excuse me, marriage.
+
+If you're married, we're estimating that an 11.3 increase also being statistically significant.
+
+And that's binary.
+
+So this one is you're married or you're not married.
+
+It's not years married, it's just married or not.
+
+So if you're married, 11.3% increase in wages.
+
+Increase in logged wages.
+
+Education.  For every additional year of education, we're accounting for the 10%.
+
+Now remember too, this is important to recall.
+
+Education in our data set is the same as black.
+
+That means that it is constant.
+
+It was not time varying, it was time invariant.
+
+So it was constant over the time of our data set.
+
+But in this case in the pooled model, we're not looking at a fixed effect model yet.
+
+So we still see that.
+
+So it's 10.3% increase for every additional year of education.
+
+Pretty, pretty impressive returns.
+
+And then if you were black in our pooled model, you would see a reduction in the tune of 14.5% just for being black.
+
+Pretty sad there.
+
+So the pooled model though, we know that it incorporates a lot of bias given what we know about our data and what we know about heterogeneity bias.
+
+So we went through all this, we already know.
+
+Can we trust our estimate though?
+
+The pooled model is combining what our fixed effect model would look at, which is the between person differences.
+
+And it's also though looking at the within person effect.
+
+So we're controlling for, we're looking at how did person A compare against person A and how did person A compare against person A?
+
+And then it gets muddies the water and it doesn't control for those individual differences, therefore creating some bias.
+
+In this case it could lead to upward bias.
+
+And so let's move into a fixed effect model first of which we will be looking at our LM function for the use.
+
+You'll see here we have our formula.
+
+If you're asked, and I didn't touch on this earlier, you are asked in the module, in the module lab, pardon me, to include your formula.  There is always.
+
+You still get the same points either way.
+
+If you were to just write it out as text or if you were to actually use latex for the additional styling, highly encourage you to utilize Latex, whenever you're doing any kind of mathematical formulas, this is what we're looking at here.
+
+This is for the pooled model, just incorporating the dollar signs.
+
+And then feel free to look this up.
+
+This is a great use case for AI not to ask AI, hey, can you write the model for me?  Don't do that please.
+
+That would not be to your benefit, but instead ask it, hey, this is my model that I need to use.
+
+So you write the model and you say, but I want to convert this to latex so that I can create a nice clean output.
+
+I have no problem with you doing something like that.
+
+Assuming you're doing the honorable thing here of not asking it to produce the outcome for you, but instead feeding it what you want and then it just simply shows you the code.
+
+AI is a great tool for things like that and for this course.
+
+Let's see, get back to where we were.  There we go.
+
+So the formula here, keep that in mind.
+
+Sorry, the latex, that's what I was getting.
+
+I'm going off on a tangent here.
+
+The using latex, there is a great way to create a nice aesthetic in your outputs.
+
+So we're going to do the LM function, we're going to have our outcome variable, our policy variable, our controls, and then super important, we're going to be using our factor.
+
+So that's the way that R differentiates groups or identifies groups.
+
+And we're going to be doing that on our number or personal identifier as we called it.
+
+And that allows us to focus in on group level characteristics.
+
+So we're going to be able to look at the or control for some of that heterogeneity bias and the minus one, if you recall, if we were to include this, it actually allows each individual group to have its own intercept.
+
+If we left this out instead we would have a global intercept from which every value that shows for the additional nr.
+
+So the first number would be dropped.
+
+In our case, I think it would be 13.
+
+So person 13 would be dropped.
+
+Their average baseline would show as the intercept and then every other person thereafter would actually represent a plus or minus.
+
+So some deviation from what person 13 in this case would have represented.
+
+And so kind of like diff in diff, one value represents the difference or the change.
+
+That's the same with how intercepts work.
+
+If you were to leave out the negative one, keeping it in is really nice.
+
+So everybody has their own intercept.
+
+In this case we are going to utilize keep for our Stargazer because if we were to not do that Again, we have 545 individual dummies for our personal identifiers.
+
+I don't want to print that many lines in my Stargazer table.
+
+It would just be unsightly.
+
+So we're only going to look at these here.
+
+If you wanted to ignore this keep and you wanted to rerun this code through, you can.
+
+And if you wanted to see all 545 individual group intercepts, you're more than welcome to.
+
+But that's why we did keep here.
+
+So we have now with our pool, with our fixed model, fixed effect model using the LM function, our new estimated union membership coefficient is in the tune of 8.4%.
+
+To remind you, originally in our pooled model, we calculated it to be 18.4%.
+
+That is a 10% on the dot change or reduction from what we originally estimated.
+
+Now for experience, this is actually really interesting.
+
+For experience, it was previously 0.5.
+
+Sorry, 0.05.
+
+So it was a 5% increase for every additional year of experience.
+
+In our fixed effect model, we're actually estimating it's a little bit higher.
+
+An additional percentage point to the tune of 6% increase in wages, logged wages per year of experience.
+
+That's huge.  And this one surprised me probably the most of all that even though it's not as significant, recall marriage was a increase of 11.3% for being married.
+
+In our case, we still see a highly statistically significant increase.
+
+In this case, it's about half of what we originally estimated in the pooled model at 6.1% just for being married.
+
+And now if we're looking at the difference there, I already talked about that, you can look at those if you wish.
+
+All of these are highly statistically significant in our fixed effect model.
+
+So when we control for group level heterogeneity, we're able to see a more isolated and accurate assessment of the effect of union membership.
+
+Experience in years and then marriage.
+
+Now last, this is the route you should plan on going in.
+
+All of your work is using the PLM function.
+
+So we're going to be using the PLM function, which works similarly to lm.
+
+But in this case we have our.
+
+We put in our variables.
+
+The difference is going to be that this includes both an index and a model argument.
+
+The index is going to incorporate the group levels.
+
+So we're going to be looking at.
+
+Our first group level is going to be the personal identifier and then we're going to be doing year.
+
+So for every person year combination, we want to look at how that person performed in each year and then compare them to their pre to the.
+
+To the other years.
+
+So we're identifying two layers of grouping variables with the index here and then the model itself we want to establish as within.
+
+There's other arguments that you can use for model but for our use case we're going to use within because that's our fixed effects model.
+
+So we're looking at the within group variation so each person, how they perform year over year and Our Stargazer output 0.084.
+
+That's what we saw in our fixed effect model with the LM function experience and married.
+
+One thing that we didn't talk about, and I don't think it goes over in the lecture, is there is a difference between the R squared and adjusted R squared.  Gosh, sorry.
+
+I keep highlighting the same thing between our PLM function and our limb function.
+
+And that's really important too because of how LM works.
+
+It will always show a much higher correlation value.
+
+And so that's another argument for why we want to use the PLM function is it gives us a more accurate R squared and adjusted R squared.
+
+So something to keep in mind there too.
+
+It's not just the coefficient readings but the additional statistics.
+
+Now if we were to put all these in a Stargazer table and put them next to each other once again, intercept bottom equals false.
+
+Want to make sure we're adjusting our covariances accordingly.
+
+So we have our pooled model which has an intercept, a global intercept.
+
+Our fixed effect models do not because in our case we dropped the global intercept and every single group in our LM fixed effect has its own intercept.
+
+We're just not showing them here because that would be 545 additional rows.
+
+We can see the change so 18.4% when we convert it to the percentage change versus an 8.4%.
+
+So a 10% difference here, 0.1%.  Sorry.
+
+A 1% increase for experience in years between the pulled model and the fixed effect model.
+
+And then again marriage still statistically significant as far as increasing wages.
+
+Logged wages but a about half of what we had estimated previously.
+
+Very important.  As noted at the beginning, education in our example is constant over time, so it doesn't change year to year.
+
+Their education remained the same from the beginning of the data set collection period to the end.
+
+And so in our case our fixed effect models are smart enough to say this remained constant.  We're going to kick it out.
+
+We're not even going to display it because it doesn't affect.
+
+Because it's already controlled for at that level.
+
+So everybody's education hasn't remained the same over time as controlled for.
+
+And same with being black.
+
+And then at another point earlier we showed the Hispanic, I think it was in one of our formulas, even if it wasn't here, that would be controlled for too.
+
+So if you were to ever put in a variable that was constant over time and your model, if using the PLM function or the LM function with factoring on your, your group, that would kick it out of the model.
+
+It would be perfectly collinear, perfect collinearity.
+
+I'm blanking, forgive me on the, the precise terminology, but it would be just perfectly collinear.
+
+I believe that is it across the board.
+
+And so our model knows enough to kick that out.
+
+Now, this is an area we didn't talk about in the lecture, and I want to make sure we go over it here.
+
+If you think back to our interrupted time series model, when we have time series data, generally speaking, your data from January to February is going to be highly correlated.
+
+Usually you'll have a, your January data is going to look similar or have patterns correlating it with your February data and so on for any other month looking forward or backward.
+
+So time series data virtually always has autocorrelation.
+
+In this case, we're not working with explicitly time series data.
+
+We're working with panel data, which is going to be time series data for multiple groups over multiple time periods.
+
+And so it's very easy to say that at a group level we will have autocorrelation within each of our groups.
+
+So one of the things that we can do to go a step farther in getting a better assessment in terms of our significance level is using clustered standard errors.
+
+And the way that we do that is we first check our autocorrelation like we did in time series, interrupted time series, where we use the ACF function.
+
+So first we extract the residuals from our model.
+
+In this case, we are using our plm.
+
+And then we're going to save that to an object, and then we feed that object into the ACF function.
+
+In this case, we also give it a title.
+
+Here you don't have to do that.
+
+And to recall what the ACF function does is it takes every time period and it lags it with the previous, and then it gets a correlation value for each of those values, and then it maps those out, showing the correlation strength and then the significance level.
+
+So if we're looking at these blue horizontal dashed lines, any of our vertical lines that cross those boundaries Indicate that at that lag in the ACF function is how we call it, there was significant autocorrelation.
+
+0 is always going to be statistically significant because January of year in matches the same January and year year in.
+
+So they're perfectly correlated.
+
+However, where it starts to want to pay attention, where we want to start to pay attention is the first leg.
+
+So we have our first leg going beyond the line, second leg, third leg, fourth leg.
+
+So virtually every time period here had statistically significant autocorrelation, indicating that we needed to, we now need to adjust for it using, in this case, clustered standard errors.
+
+This is going to be a bit different than what we did in the interrupted time series model.
+
+So in our case, we're going to be using the sandwich and the LM test package that we brought in at the beginning.
+
+We're going to use this variance of the covariance hc.
+
+I forget what HC stands for, but we're going to use this function, we're going to feed our model and then we're going to set type equals hc1.
+
+And this part's really cool about the function.
+
+We establish our cluster and we call it group.
+
+The reason we can get away with that is if you think about it, we don't have group established anywhere in our PLM function.  So what does group mean?
+
+How does it know what our model's group is?
+
+We tell it to group, and then it sees that we fed it a panel linear model function and then it looks at what our index was that we established previously.
+
+So recall that we set up our index as the personal identifier, and then the year that index is then what is fed to that group.
+
+So our variance of the covariance HC function, it recognizes that.
+
+So using group tells it to look at the index and then we save this to our clustered standard errors object and we go ahead and look at it.
+
+So remember that our estimations will remain the same.
+
+In this case we just have more decimal points.
+
+So it looks a little different, but it still rounds up to the same thing.
+
+8.4% increase.
+
+6% increase is what we saw before.
+
+For experience, marriage was the 6.1.
+
+In this case, the only thing that's changed, though we still have highly statistical significance for both union and experience, and we do still for marriage.
+
+But we did technically lose one asterisk.
+
+Slight change, meaning that we were a little overconfident in our marriage coefficient earlier before accounting for the clustered standard errors.
+
+But even now accounting for them, we still have a highly statistically significant coefficient.
+
+So great we checked it.
+
+All of our stuff passes.
+
+We're in a very good position.
+
+Our model tells us that union membership increases income.
+
+Logged income, experience and marriage do the same.
+
+Now, I mentioned at the beginning, this is like the most granular level for our coefficients.
+
+They're so small we've just been converting them directly, moving the decimal over two to the right to get an idea of what the percentage change in logged wages would be.
+
+It's not technically correct, but it gets us pretty darn close for our purposes.
+
+However, if you're doing your own work, you should do it the exact way.
+
+And so the formula is here for you.
+
+If you're familiar with the logs.
+
+If you have something that is logged in order to take it away or to unlog it.
+
+The technical term is exponentiating it.
+
+So we do that here by exponentiating, pardon me, our coefficient.
+
+We subtract one from that and then we multiply by 100.
+
+And that's going to convert that back to our.
+
+And that's going to convert that back to the real wages, Pardon me, not the real wages.
+
+This will convert it to the exact percentage change.
+
+Whereas right now we're taking a rough estimate.
+
+For instance, I think if we were to follow this formula for our union flag here, our union coefficient, it ends up being for getting it wrong for our pooled model, I did this outside of this code through our pooled model showed about 18.4% for that coefficient on union.
+
+If we were to do this formula on that, I think it puts us in the tune of like 19 and change, 19% and change.
+
+So there's some slight variation.
+
+But if you do this formula, but that's technically the way to get it to the exact percentage chain.
+
+So now looking at these differences that we saw, we have pulled, model being the 18% wage premium, the fixed effect model being 8%, what does that tell us?
+
+That tells us that about half of the apparent union wage premium we saw in the pooled model, it was actually due to some level of heterogeneity.
+
+Because when we did not account for heterogeneity, we saw this 18%, but when we accounted for it, we saw a 10% reduction.
+
+And so that 10% being that it was controlled for and the difference was accounting for group level heterogeneity, that allows us to ascertain, okay, the thing that was different was there's about 10% of this income difference isn't associated with union membership.
+
+Our pooled model thought it was.
+
+But by incorporating the fixed effect model, we're saying, okay, 10% of that was actually just due to person to person differences.
+
+Again, that goes back to things like the people who join unions might actually be more motivated.
+
+So a little bit of selection bias in there.
+
+Or those who don't join unions are.
+
+And again, not the effect of union membership itself.
+
+Or it could have worked in the opposite.
+
+It didn't, but it could have worked in the opposite like we saw earlier, where let's just say that highly motivated people tend to make more money regardless of union membership.
+
+And then as we talked about too, we saw that education and race remained constant.
+
+So they were kicked out of the model because they didn't have an effect, because it was holding those constant already.
+
+Now we want to officially test the model.
+
+We want to officially test whether fixed effects is better than the pooled model or really the question is more so is the pooled model adequate?
+
+And then we run the PF test, put in our PLM model and then again our pooled model and then the output, it tells us based on the P value here, if the P value is less than than.05, we reject the null hypothesis.
+
+And with this we also have a very high F statistic.
+
+So we reject the null hypothesis, meaning that individual fixed effects are definitely needed and that there is significant unobserved heterogeneity across individuals that affect wages.
+
+So we can know confidently we need to move forward and utilize our fixed effect model, which we've done.
+
+That's the one that we should lean on.
+
+Now we talked earlier, we don't need these intercepts for anything at the moment.
+
+I believe you have to pull these out in the lab so you'll use the fixef function on your PLM model to pull out your actual effects.  We can see those here.
+
+Again, we didn't list all of them because there's 545 of them.
+
+So we'll just look at the first 10 and then we can look at the summary here and we can see some of the differences.
+
+So when we're looking at these calculated baselines of logged wages, we can see that they go from negative 0.01 all the way up to 2.9.
+
+Just another indicator of.
+
+There's a lot of distribution happening here pointing towards individual heterogeneity.
+
+What explains these massive differences?
+
+A lot of individual difference between people feed into that.
+
+Okay, now we've talked about these, so ignore this.
+
+We've already talked about all that.
+
+This is where I want to give you a heads up for your lab.
+
+When it comes to our lab, we discuss A policy variable, that variable being beer taxes and its effect on accidents.
+
+And so that one is a interesting one because it is a beer tax, which represents a proportion.
+
+So it's going to show in the data, let's just say it had a 0.5 beer tax.
+
+That's a 50% tax rate.
+
+So 50% of the cost of beer is the tax that you'll pay, but it's represented as 0 to 1, which affects how our interpretation of our coefficients directly works.
+
+So the issue is that it always looks at a one unit increase.
+
+So in our regression model, it's only going to interpret the coefficient based on a one unit increase.
+
+And a one unit increase in a beer tax is going to be a 100% increase in the beer tax.
+
+And realistically, if we look at our coefficient, and if we say it's, let's say our coefficient hypothetically would be negative 17.6.
+
+That would be meaning that a 100% increase in beer taxes would represent, according to our context or our lab, being accidents is the outcome.
+
+It would reduce accidents per year by about 17.6, which is helpful to know.
+
+But 100% increase in beer taxes is just not realistic.
+
+I, I could be wrong and I'd be happy to be wrong, but I can't think of a law that would be passed that would increase beer taxes to that extreme.
+
+So what I would recommend for you, and I'm going to give you a few options here, but what I'm recommending and what I'm then asking in the lab instructions itself, where there's a note for you to look at, there is.
+
+I would love for you to interpret this at the 1 percentage point level.
+
+You can do it in multiple levels, but for our purposes in the lab, I'm going to ask you to do it at a 1 percentage point level.
+
+So again, baseline, if we were to just take the coefficient as it shows, it's representing a 100% change, 100% increase, and therefore the coefficient is how many less accidents or more accidents, depending on the sign we would see at that level.
+
+If you wanted to look at it at the 1% unit increase, we would simply multiply by 0.01.
+
+And that would mean that for every 1 percentage point increase in beer taxes, we would expect to see 0.176 or 0.18 less accidents per year.
+
+Pretty small, but that's how the interpretation would work.
+
+Hopefully that makes sense.
+
+As always, if you have questions about it, please contact us.
+
+Contact me in the the discussion board for this week's Module and I can, I can clarify if needed.
+
+So, moving on, the last thing we're going to touch on is the demeaning approach.
+
+This is super straightforward, but it's a bonus question in your lab, so extra points for you if you wish to do it.
+
+And it's really just a good opportunity to practice some of your diplier skills.
+
+What we want to do is demonstrate one, how to demean our data at the group level.
+
+And then we also want to run an OLS with the demean data to see how it stacks up against our other fixed effect models we run.
+
+So first is demeaning it.
+
+The applier is awesome.
+
+So we're going to do our wage pan.
+
+We're going to pipe that to group it by our grouping variable, which again is the personal identifier nr.
+
+And then we're going to pipe that and we're going to mutate.
+
+Mutate again is we're going to create new columns.
+
+In this case, though, not to get ahead of myself, but we actually overwrite these columns because I want to use these column names for our Stargazer output.
+
+So everything lines up.
+
+So we're saying the new column equals the name of the old column minus the wage mean wage of that column.
+
+So we're just going to be creating a new column named L wage, which is replacing the old column.
+
+So the log wage minus the mean of logged wage, the union value minus the mean of the union values for that again at the group level.
+
+So the personal level and then same with the experience and then marriage, etc.
+
+And then we're going to ungroup because if you don't and group, you can have some weird issues later on if you continue to use that data.
+
+And then we're going to go ahead and do a summary to see what this looks like.
+
+This is just checking to make sure that the, the mean of the mean, once we've demeaned it, it should be zero.
+
+So we're just confirming that we did that.  Right.
+
+And then last, we're going to go ahead and plot it.
+
+So we run our LM function and then we, in this case we're putting in the minus one because we're going to get rid of the global intercept on this as well and we're going to save it to our demeanols and then we're going to run it.
+
+And for context, this is what I wanted to show you, our covariate labels.
+
+I just wanted to apply all of these in such a way that they showed up equally in our previous model.
+
+The fixed effects with PLM it utilized the column names L, Wage, union and experience and marriage.  Excuse me.
+
+And if I didn't do the overriding of the original column name then these would have actually not evenly stacked up.
+
+I would have had six total rows here showing.
+
+So long story short, that was just to get these to line up perfectly so we can see a side by side comparison.
+
+So we can see our fixed effects with panel data or sorry with the PLM function calculating the exact same coefficient and statistical significance as our demeaned data.
+
+Same goes for experience, same goes for marriage.
+
+So really interesting to see.
+
+And also we can see that we calculated really similar standard errors, which is pretty cool.
+
+And also fairly similar R squared, especially in comparison to just our normal non demeaned LM function when we factored our group.
+
+So all that to show you is that demeaning the data is essentially what it's doing when we do a fixed effect model.
+
+You demean the data that subtracts out the within group variation the the time in varying characteristics.
+
+So demean data is demeaning is essentially the same process that fixed effect follows.
+
+Cool.  And we already talked about this, so why would it remain?
+
+Why would education be constant over time?
+
+It's again, we've already hashed that out, but you could reference this as needed later.
+
+One of the critical elements that fixed effect does not of course control for is anything that varies over time.
+
+So if we want to measure something that varies over time, we would not be using a fixed effect model.
+
+In fact, we would be looking at something called a random effects model which we won't be going into here, but you can feel free to look into that on your own.
+
+This is, we're going to run through this.
+
+All this is doing is throwing in education and it's showing that it is kicked out of our model because once again remains constant over time.
+
+It doesn't change per person, so it doesn't actually affect our result.
+
+So this is everything we've already gone through and talked about, so we're not going to bother with it.
+
+Quick reference for the lab.
+
+You're going to be using the pooled model, the fixed effect model with the LM function including the negative one.
+
+You'll use pftest, you'll use fixed effects to extract the intercepts and then you'll just a reminder for how to be cautious when interpreting your beer taxes proportion variable.
+
+Other than that, my friends, this has been our week three fixed effect module code through.
+
+Please reach out with any questions.
+
+If nothing else, good luck on the lab.
+
+And congrats on getting halfway through the session.  We'll talk soon.
+

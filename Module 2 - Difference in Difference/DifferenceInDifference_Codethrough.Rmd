@@ -1,0 +1,806 @@
+---
+title: "Difference-in-Differences | Codethrough"
+subtitle: "PAF 512 - Advanced Regression"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    code_folding: show
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+<style>
+  /* --- ASU Theme Elements --- */
+  
+  /* Maroon Headers */
+  h1, h2, h3, h4 {
+    color: #8C1D40 !important;
+  }
+  
+  /* Gold Links */
+  a {
+    color: #D4AF37 !important;
+  }
+  
+/* --- The Instructor Note Box --- */
+  .instructor-note {
+    background-color: #fff8e1 !important; 
+    
+    border-left: 6px solid #8C1D40;
+    color: #2c3e50;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .instructor-note strong {
+    color: #8C1D40;
+    font-size: 1.1em;
+  }
+
+  /* --- Table of Contents Styling --- */
+
+  /* 1. Active State (The section you are currently reading) */
+  .list-group-item.active, 
+  .list-group-item.active:focus, 
+  .list-group-item.active:hover {
+    background-color: #8C1D40 !important;
+    border-color: #8C1D40 !important;
+    color: white !important;
+  }
+
+  /* 2. Level 2 Headers (##) -> GOLD Bar */
+  /* This targets any subheader */
+  .tocify-subheader .list-group-item {
+    background-color: #f9f9f9; 
+    border-left: 4px solid #FFC627 !important; /* ASU Gold */
+    font-size: 0.9em; 
+    color: #555; 
+    padding-left: 15px !important; 
+  }
+
+  /* 3. Level 3 Headers (###) -> MAROON Bar */
+  /* This targets a subheader INSIDE another subheader */
+  .tocify-subheader .tocify-subheader .list-group-item {
+    border-left: 4px solid #8C1D40 !important; /* ASU Maroon */
+    padding-left: 30px !important; /* Double the indentation */
+  }
+
+  /* 4. Hover Effects */
+  .tocify-subheader .list-group-item:hover {
+    background-color: #fffdf2 !important;
+    color: #8C1D40 !important;
+  }
+  /* --- Code Block High Contrast Overrides --- */
+
+  /* 1. The Code Block Container */
+  pre {
+    background-color: #f4f4f4 !important; /* Light grey background */
+    border: 1px solid #ddd !important;     /* Subtle border definition */
+    color: #212529 !important;             /* Force base text to be VERY dark grey */
+    font-weight: 500;                      /* Make text slightly thicker */
+  }
+
+  /* 2. Comments (The most important fix) */
+  /* We target the class '.co' which R uses for comments */
+  code span.co {
+    color: #486a48 !important; /* A dark, readable forest green */
+    font-style: italic;        /* Italicize to differentiate from code */
+    font-weight: normal;       /* Keep comments lighter weight */
+  }
+
+  /* 3. Strings (Text inside quotes) */
+  code span.st {
+    color: #8C1D40 !important; /* Use ASU Maroon for strings! */
+    font-weight: bold;
+  }
+  
+  /* 4. Numbers and Keywords */
+  code span.dv, code span.kw {
+     color: #004d40 !important; /* Dark teal for numbers/logic */
+  }
+</style>
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+
+
+# What will we cover?
+
+#### 1. Introduction to Difference-in-Differences
+
+-   Understanding the DID Research Design
+-   Key Assumptions and Requirements
+
+#### 2. Build and Run the DID Model
+
+-   Load and Explore the Dataset
+-   Create DID Variables
+-   Estimate the Model
+
+#### 3. Interpret Model Coefficients
+
+-   Understanding Each Beta Coefficient
+-   Calculating Group Means from Coefficients
+
+#### 4. Visualize the DID Design
+
+-   Plot Group Means Over Time
+-   Illustrate the Treatment Effect
+
+#### 5. Calculate the Counterfactual
+
+-   Construct the Counterfactual Scenario
+-   Quantify Program Impact
+
+
+#### 6. Comparing DID and ITS Approaches
+
+-   When to Use Each Method
+-   Running Both Models on the Same Data
+-   Understanding the Differences
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+
+# Introduction
+
+## What is Difference-in-Differences?
+
+Difference-in-Differences (DID) is a quasi-experimental research design used to estimate causal effects of interventions or policy changes. The approach compares the change in outcomes over time between a group that received treatment and a group that did not.
+
+### The Core Logic
+
+The DID estimator captures:
+
+1. **The difference** in the treatment group before and after the intervention
+2. **Minus the difference** in the control group over the same period
+
+This "difference of differences" isolates the treatment effect by removing:
+
+- Pre-existing differences between groups
+- Common time trends affecting both groups
+
+### The Mathematical Formula
+
+$$(Treatment_{post} - Treatment_{pre}) - (Control_{post} - Control_{pre}) = DID$$
+
+### The Statistical Model
+
+We estimate the following regression:
+
+$$Y = \beta_0 + \beta_1 \cdot Group + \beta_2 \cdot Post + \beta_3 \cdot (Group \times Post) + \epsilon$$
+
+Where:
+
+- **Y** is the outcome variable
+- **Group** is a dummy variable (1 = treatment group, 0 = control group)
+- **Post** is a dummy variable (1 = post-treatment period, 0 = pre-treatment period)
+- **Group × Post** is the interaction term that captures the DID effect
+
+### Key Assumptions
+
+The success of a DID analysis rests on two critical assumptions:
+
+1. **Parallel Trends Assumption:** In the absence of treatment, the treatment and control groups would have followed similar trends over time. This is the most important and often most challenging assumption to satisfy.
+
+2. **No Spillover Effects:** The treatment of one group does not affect the outcomes of the control group.
+
+We will explore how to assess the parallel trends assumption later in this codethrough.
+
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+# Data 
+
+We will use the **injury** dataset from the `wooldridge` package, which contains data on workplace injuries and workers' compensation benefits in Kentucky and Michigan.
+
+## Policy Context
+
+In 1980, Kentucky increased workers' compensation benefits for workplace injuries, while Michigan did not change its benefit structure. This provides a natural experiment to study whether higher benefits lead to longer injury durations (potentially due to moral hazard (i.e., workers may stay out longer when benefits are more generous).
+
+- **Research Question:** Did increasing workers' compensation benefits in Kentucky lead to longer injury durations?
+
+- **Hypothesis:** Higher workers' compensation benefits will increase the duration of workplace injuries.
+
+## Dataset Details
+
+- **Treatment Group:** Kentucky (increased benefits in 1980)
+- **Control Group:** Michigan (no change in benefits)
+- **Time Periods:** Before 1980 (pre-treatment) and 1980 onwards (post-treatment)
+- **Outcome Variable:** Duration of workplace injuries (in weeks)
+
+## Setup and Data Loading
+
+```{r}
+# Install/Load Packages
+# install.packages("wooldridge")
+# install.packages("stargazer") 
+# install.packages("dplyr")
+library(wooldridge)   # Contains the injury dataset
+library(stargazer)    # Clean regression tables
+library(dplyr)        # Data manipulation
+```
+
+## Load and Inspect Data
+
+```{r}
+# Load the injury dataset
+data(injury)
+
+# Display structure of the dataset
+str(injury)
+```
+
+## Key Variables
+
+Let's identify the key variables we'll use:
+
+```{r}
+# Summary statistics for key variables
+summary(injury[, c("durat", "afchnge","highearn", "ky")])
+```
+
+
+**Variable Descriptions:**
+
+| Variable | Description |
+|----------|-------------|
+| `durat` | Duration of injury (in weeks) |
+| `ky` | State indicator (1 = Kentucky, 0 = Michigan) - our Group variable |
+| `afchnge` | Time period indicator (1 = after policy change, 0 = before) - our Post variable |
+| `highearn` | High earner indicator (1 = above median earnings) |
+
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+# Difference-in-Difference
+
+## Build Model
+
+### Create Variables
+
+While the injury dataset already contains the necessary dummy variables, let's create them explicitly to understand the DID structure:
+
+```{r}
+# Rename `ky` for clarity (treatment group flag)
+injury$Group <- injury$ky
+
+# Rename `afchng` for clarity (Post invervention flag)
+injury$Post <- injury$afchnge
+
+# Create the interaction term (Group × Post)
+injury$Group_Post <- injury$Group * injury$Post
+ 
+rbind(
+  head(injury[,c("Group", "Post", "Group_Post")], 5),
+  tail(injury[,c("Group", "Post", "Group_Post")], 5)
+  )
+```
+
+```{r}
+# Verify the variables and check counts
+injury %>% 
+  group_by(Group, Post) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  mutate(
+    Group_Label = ifelse(Group == 1, "Kentucky", "Michigan"),
+    Period = ifelse(Post == 1, "Post-1980", "Pre-1980")
+  ) %>%
+  select(Group_Label, Period, n) 
+```
+
+### Explore Group Means
+
+Before running the regression, let's calculate the means for each group in each time period. This will help us understand what each coefficient represents.
+
+```{r}
+# Calculate means for all four combinations
+group_means <- injury %>%
+  group_by(Group, Post) %>%
+  summarise(
+    Mean_Duration = mean(durat, na.rm = TRUE),
+    N = n(),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    Group_Label = ifelse(Group == 1, "Kentucky (Treatment)", "Michigan (Control)"),
+    Period = ifelse(Post == 1, "Post (After 1980)", "Pre (Before 1980)")
+  )
+
+# Display the means
+group_means %>%
+  select(Group_Label, Period, Mean_Duration, N)
+
+```
+
+### Manual DID Calculation
+
+Let's calculate the DID estimator manually using the group means to understand the logic:
+
+```{r}
+# Extract the four means
+C_pre <- group_means %>% filter(Group == 0, Post == 0) %>% pull(Mean_Duration) 
+C_post <- group_means %>% filter(Group == 0, Post == 1) %>% pull(Mean_Duration) 
+T_pre <- group_means %>% filter(Group == 1, Post == 0) %>% pull(Mean_Duration) 
+T_post <- group_means %>% filter(Group == 1, Post == 1) %>% pull(Mean_Duration)
+
+# Calculate the differences
+diff_treatment <- T_post - T_pre
+diff_control <- C_post - C_pre
+did_estimate <- diff_treatment - diff_control
+
+# Display results
+cat("Control Group (Michigan):\n")
+cat("  Pre-treatment mean:", round(C_pre, 2), "weeks\n")
+cat("  Post-treatment mean:", round(C_post, 2), "weeks\n")
+cat("  Change:", round(diff_control, 2), "weeks\n\n")
+
+cat("Treatment Group (Kentucky):\n")
+cat("  Pre-treatment mean:", round(T_pre, 2), "weeks\n")
+cat("  Post-treatment mean:", round(T_post, 2), "weeks\n")
+cat("  Change:", round(diff_treatment, 2), "weeks\n\n")
+
+cat("Difference-in-Differences:\n")
+cat("  (", round(diff_treatment, 2), ") - (", round(diff_control, 2), ") =", round(did_estimate, 2), "weeks\n")
+```
+
+### Run the Model
+
+Now let's estimate the model using regression:
+
+```{r, results = 'asis'}
+# Run the DID regression
+DID_model <- lm(durat ~ Group + Post + Group_Post, data = injury) 
+
+# Display results
+stargazer(DID_model, 
+          #type = "html", 
+          type = "text",
+          dep.var.labels = "Injury Duration (weeks)",
+          column.labels = "DID Model",
+          covariate.labels = c("Control Group (Pre): (β0)",
+                               "Delta Treatment Group (Pre) (β1)", 
+                               "Delta Control Group (Post) (β2)", 
+                               "DID Estimator (β3)"),
+          omit.stat = "all", 
+          digits = 2,
+          intercept.bottom = FALSE)
+```
+
+
+## Interpret Model Coefficient
+
+**$\beta_0$**: Control Group, Pre-Intervention Mean
+
+  - The average number of weeks spent on workers compensation benefits in Michigan, during the pre-intervention period, was $12.06$. This is statistically significant as it is different from $0$.
+
+**$\beta_1$**: Pre-Intervention Delta between Treatment and Control 
+
+  - The treatment group (Kentucky) had claimants spending, on average, $3.73$ **fewer weeks** on workers compensation benefits compared to the control group (Michigan). This is statistically significant, suggesting the groups were different prior to intervention. 
+
+**$\beta_2$**: Pre-to-Post Period Delta within Control Group (`Secular Trend`)
+
+  - From the pre-to-post period, the number of weeks Michigan's workers stayed on workers compensation grew by $3.41$. This is statistically significant.
+
+**$\beta_3$**: Treatment effect (`Difference-In-Difference Estimator`)
+
+  - The treatment group (Kentucky), in the post-intervention period, had claimants spending $2.17$ fewer weeks on worker's compensation benefits compared to the control group (Michigan). The effect of increasing workers compensation benefits reduced the duration of claims by $2.17$ weeks relative to the control group's trend. **However, this is not statistically significant according to our model and therefore the treatment had no statistically significant effect on the number of weeks spent receiving benefits. **
+
+<div class="instructor-note">
+**Instructor's Note:**
+
+**Important:** Groups do NOT need to be identical in the pre-treatment period for valid DID inference. They only need to have **parallel trends**. The DID design accounts for baseline differences through the $\beta_1$ coefficient.
+</div>
+
+
+## Summarize Interpretations
+
+```{r, results = 'asis'}
+# Extract coefficients
+b0 <- coef(DID_model)[1]  # Constant
+b1 <- coef(DID_model)[2]  # Group
+b2 <- coef(DID_model)[3]  # Post
+b3 <- coef(DID_model)[4]  # Group x Post
+
+# Create a comprehensive summary table
+coef_summary <- data.frame(
+  Coefficient = c("B0",
+  "B1",
+  "B2",
+  "B3"),
+  Value = round(c(b0, b1, b2, b3), 2),
+  Interpretation = c(
+    "Control group mean before treatment",
+    "Difference between groups before treatment",
+    "Change in control group over time (secular trend)",
+    "Additional change in treatment group (treatment effect)"),
+
+Hypothesis = c(
+    "Is control pre-treatment mean ≠ 0?",
+    "Did groups differ before treatment?",
+    "Did control group change over time?",
+    "Did treatment have an effect?")
+  )
+
+coef_summary
+```
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+## Group Means from Coefficients
+
+We know how to interpret the coefficients and therefore tell the differences between groups, but how do we calculate the actual values from our coefficients?
+
+### The Four Group Means
+
+```{r}
+# Calculate each group mean from coefficients
+control_pre <- b0
+control_post <- b0 + b2
+
+treatment_pre <- b0 + b1
+treatment_post <- b0 + b1 + b2 + b3
+
+# Create comparison table
+means_table <- data.frame(
+  Group = c("Control (Michigan)", "Control (Michigan)", 
+            "Treatment (Kentucky)", "Treatment (Kentucky)"),
+  Period = c("Pre-1980", "Post-1980", "Pre-1980", "Post-1980"),
+  Formula = c(
+  "$\\beta_0$",
+  "$\\beta_0 + \\beta_2$",
+  "$\\beta_0 + \\beta_1$",
+  "$\\beta_0 + \\beta_1 + \\beta_2 + \\beta_3$"),
+  Calculated = round(c(control_pre, control_post, treatment_pre, treatment_post), 2),
+  Actual = round(c(C_pre, C_post, T_pre, T_post), 2)
+)
+
+means_table
+```
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+## Visualize the DID Design
+
+Visualization is crucial for understanding and communicating DID results. Let's create a graph that clearly shows the treatment effect.
+
+### Create the DID Plot
+
+```{r, fig.width=10, fig.height=6}
+# Calculate counterfactual (what would have happened to treatment group without treatment)
+counterfactual <- T_pre + (C_post - C_pre)
+
+# Create the plot
+plot(c(1, 2), c(C_pre, C_post), type = "b", col = "steelblue", pch = 19, lwd = 2,
+     ylim = c(0, max(c(C_post, T_post, counterfactual)) * 1.15),
+     xlim = c(0.7, 2.5),
+     xlab = "", ylab = "Injury Duration (weeks)",
+     main = "Difference-in-Differences: Kentucky Workers' Compensation Reform",
+     xaxt = "n")
+
+# Add custom x-axis
+axis(1, at = c(1, 2), labels = c("Pre-Treatment\n(Before 1980)", "Post-Treatment\n(1980 onwards)"))
+
+# Add treatment group line (actual outcomes)
+lines(c(1, 2), c(T_pre, T_post), col = "#8C1D40", lwd = 2, type = "b", pch = 19)
+
+# Add counterfactual line (dashed)
+lines(c(1, 2), c(T_pre, counterfactual), col = "#FFC627", lwd = 2, lty = 2)
+points(2, counterfactual, col = "#FFC627", pch = 17, cex = 1.5)
+
+# Add vertical line at intervention
+abline(v = 1.5, col = "gray", lty = 3, lwd = 1)
+text(1.5, max(c(C_post, T_post)) * 1.1, "Policy Change", col = "gray40", cex = 0.9)
+
+# Add labels for means
+text(1, C_pre, paste0("C_pre: ", round(C_pre, 1)), pos = 2, cex = 0.8, col = "steelblue")
+text(2, C_post, paste0("C_post: ", round(C_post, 1)), pos = 4, cex = 0.8, col = "steelblue")
+text(1, T_pre, paste0("T_pre: ", round(T_pre, 1)), pos = 2, cex = 0.8, col = "#8C1D40")
+text(2, T_post, paste0("T_post: ", round(T_post, 1)), pos = 4, cex = 0.8, col = "#8C1D40")
+text(2, (counterfactual + .3), paste0("CF: ", round(counterfactual, 1)), pos = 2, cex = 0.8, col = "#FFC627")
+
+# Add arrow showing treatment effect
+arrows(2, counterfactual-.3, 2, T_post+.3, 
+       code = 3, length = 0.1, col = "#8C1D40", lwd = 2)
+text(2.2, (counterfactual + T_post) / 2, 
+     paste0("Treatment\nEffect\n= ", round(T_post - counterfactual, 1), " weeks"),
+     pos = 4, col = "#8C1D40", cex = 0.85, font = 2)
+
+# Add legend
+legend("topleft", 
+       legend = c("Michigan (Control)", "Kentucky (Treatment)", "Counterfactual"),
+       col = c("steelblue", "#8C1D40", "#FFC627"),
+       lty = c(1, 1, 2),
+       pch = c(19, 19, 17),
+       lwd = 2,
+       cex = 0.9,
+       bg = "white")
+```
+
+### Interpreting the Visualization
+
+The graph above illustrates the core logic of difference-in-differences:
+
+1. **Control Group - Michigan:** Shows the change in the number of weeks claimants stayed on workers compensation benefits when no policy change occurs. This represents the *secular trend*.
+
+2. **Treatment Group - Kentucky:** Shows the change in the number of weeks claimants stayed on workers pre-and-post the increase in benefit amounts.
+
+3. **Counterfactual:** Shows what *would have happened* to Kentucky if the policy had not changed, assuming Kentucky would have followed the same trend as Michigan.
+
+4. **Treatment Effect:** The vertical distance between the actual outcome and the counterfactual represents the treatment effect - how much the policy changed the number of weeks claimants stayed on workers compensation benefits.
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+## Counterfactual
+
+### The Counterfactual Formula
+
+In a DID model, the counterfactual for the treatment group is:
+
+$$Counterfactual = \beta_0 + \beta_1 + \beta_2$$
+
+This formula adds together:
+
+- $\beta_0$: The control group's pre-treatment mean (baseline)
+- $\beta_1$: The pre-treatment difference between groups (Kentucky's baseline difference)
+- $\beta_2$: The time trend from the control group (what happened to everyone)
+
+**Simply remove the DiD Estimator!**
+
+### Calculate the Counterfactual
+
+```{r, results = 'asis'}
+# Calculate counterfactual using coefficients
+counterfactual_calc <- b0 + b1 + b2
+
+cat("Counterfactual Calculation:\n\n")
+cat("β0 (Control pre-mean): ", round(b0, 2), "\n")
+cat("β1 (Group difference): ", round(b1, 2), "\n")
+cat("β2 (Time trend):       ", round(b2, 2), "\n")
+cat("\n")
+cat("**Counterfactual:** ", round(counterfactual_calc, 2), " weeks\n")
+
+```
+
+### Compare Values
+
+```{r}
+# Actual outcome in treatment group post-intervention
+actual_outcome <- b0 + b1 + b2 + b3
+
+# Treatment effect is the difference
+treatment_effect <- actual_outcome - counterfactual_calc
+
+cat("\nComparison:\n")
+cat("  Counterfactual (expected without policy):", round(counterfactual_calc, 2), "weeks\n")
+cat("  Actual Outcome (observed with policy):   ", round(actual_outcome, 2), "weeks\n")
+cat("  ─────────────────────────────────────────────\n")
+cat("  Treatment Effect (β3):                   ", round(treatment_effect, 2), "weeks\n")
+```
+
+### Interpretation Summary
+
+```{r}
+# Create interpretation table
+interpretation <- data.frame(
+  Scenario = c("Counterfactual", "Actual Outcome", "Treatment Effect (β3)"),
+  Value = paste0(round(c(counterfactual_calc, actual_outcome, treatment_effect), 2), " weeks"),
+  Meaning = c(
+    "Expected KY injury duration if policy unchanged",
+    "Observed KY injury duration after policy change",
+    "Additional weeks due to increased benefits"
+  )
+)
+
+interpretation
+```
+
+**Bottom Line:** The counterfactual tells us that if Kentucky had *not* increased workers' compensation benefits, we would have expected average number of weeks claimants stayed on workers compensation benefits to be approximately **11.74 weeks** in the post-treatment period. Instead, the actual duration was **9.57 weeks** - about **2.17 weeks fewer** than expected. This difference, although not significant, would have been attributed to the policy change.
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+## Testing Parallel Trends Assumption
+
+The parallel trends assumption is critical for difference-in-differences analysis. Without treatment, the treatment and control groups would have followed the same trend over time (i.e., parallel slopes).
+
+### Why This Matters
+
+If the parallel trends assumption is violated, the DID estimator will be biased. For example:
+
+- If Kentucky's average weeks on benefits were already increasing faster than Michigan's prior to the policy change, we might mistakenly attribute this pre-existing difference in trends to the policy.
+
+- Alternatively, if Kentucky was trending downward relative to Michigan, we might overestimate the policy's true effect.
+
+### The Challenge
+
+The parallel trends assumption is technically **untestable** because it makes a claim about what *would have happened* in the absence of treatment — a counterfactual we cannot observe. However, we can analyze the pre-intervention trends to asses the plausibility of parallel trends, at least to an extent.
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+## Adding Control Variables
+
+While our basic DID model provides the core treatment effect estimate, we can improve our model's precision and account for additional variation by including control variables.
+
+### Why Add Controls?
+
+Control variables can:
+
+1. **Reduce residual variance** — More precise estimates (smaller standard errors)
+2. **Account for composition differences** — If the mix of workers differs between groups/periods
+3. **Test for heterogeneous effects** — Did the policy affect different subgroups differently?
+
+
+### Model with Controls
+
+Let's add the `highearn` variable to see if results are robust to controlling for earnings:
+
+```{r, results = 'asis'}
+# Run DID with controls
+DID_controls <- lm(durat ~ Group + Post + Group_Post + highearn, data = injury)
+
+# Compare models side by side
+stargazer(DID_model, DID_controls,
+          #type = "html", 
+          type = "text",
+          dep.var.labels = "Injury Duration (weeks)",
+          column.labels = c("Basic DID", "DID with Controls"),
+          covariate.labels = c("Constant (β0)", 
+                               "Group: Kentucky (β1)", 
+                               "Post: After 1980 (β2)", 
+                               "DID Estimator (β3)",
+                               "High Earner"),
+          omit.stat = c("f", "ser"),
+          digits = 2,
+          intercept.bottom = FALSE)
+```
+
+### Interpreting the Results
+
+Notice that:
+
+1. **The DID estimate ($\beta_3$) remains similar** — This suggests our basic model was not biased by omitting the earnings variable.
+
+2. **High earners have different injury durations** — The coefficient on `highearn` tells us that high-earning workers have significantly longer durations receiving workers compensation benefits to the tune of $5.24$ additional weeks.
+
+3. **Standard errors may change** — Adding relevant controls can reduce residuals and improve the model's precision.
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+## DID vs. ITS
+
+In the previous module, you learned Interrupted Time Series (ITS) analysis. Both DID and ITS are used to evaluate policy interventions, but they work differently. Understanding when to use each approach, and how they relate, is essential for applied policy analysis.
+
+### When to Use Each Method
+
+| Feature | Difference-in-Differences | Interrupted Time Series |
+|---------|---------------------------|------------------------|
+| `Data Structure` | Treatment & control groups, pre & post periods | Single group (or groups) observed over many time points |
+| `Key Requirement` | Parallel trends assumption | Sufficient pre/post observations to estimate trends & single intervention point |
+| `Counterfactual` | Based on control group's change | Based on pre-treatment trend projection |
+| `Secular Trend` | Captured by control group ($\beta_2$) | Captured by pre-treatment slope ($\beta_1$) |
+| `Best When` | Good comparison group exists | No comparison group, but many time points available |
+
+### Model Comparison
+
+Let's see how the two approaches model the same conceptual elements differently:
+
+**Difference-in-Differences Model:**
+$$Y = \beta_0 + \beta_1 \cdot Group + \beta_2 \cdot Post + \beta_3 \cdot (Group \times Post) + \epsilon$$
+
+**Interrupted Time Series Model:**
+$$Y = \beta_0 + \beta_1 \cdot Time + \beta_2 \cdot Treatment + \beta_3 \cdot TimeSince + \epsilon$$
+
+### Capturing Secular Trends
+
+This is a key conceptual difference:
+
+```{r}
+# Create comparison table
+trend_comparison <- data.frame(
+  Concept = c("Secular Trend", "Immediate Effect", "Sustained Effect"),
+  DID = c("β2 (Post) - Change in control group over time",
+          "β3 (Group × Post) - The DID estimator",
+          "Not separately estimated (combined in β3)"),
+  ITS = c("β1 (Time) - Pre-treatment slope",
+          "β2 (Treatment) - Level shift at intervention",
+          "β3 (TimeSince) - Change in slope after intervention")
+)
+
+trend_comparison
+```
+
+### Model Counterfactual Construction
+
+**Difference-In-Difference** 
+
+  - Constructs the counterfactual by asking: *"What happened to the control group? Assume the treatment group would have done the same."*
+
+**Interrupted Time Series**
+
+  - constructs the counterfactual by asking: *"What was the pre-treatment trend? Assume it would have continued."*
+
+Both approaches are trying to answer the same question: What would have happened without treatment? **But** they use different information to construct that counterfactual.
+
+### Practical Example
+
+In a DID model, if $\beta_2 = 5$, it means the control group's outcome increased by 5 units from pre to post period.
+
+In an ITS model, if $\beta_1 = 0.5$ and there are 10 time periods, the secular trend would produce a change of $0.5 \times 10 = 5$ units.
+
+If both models are correctly specified and the assumptions hold, they should give similar estimates of secular trends and treatment effects.
+
+In your lab, you'll be asked to compare results from both approaches applied to the same policy context. This will help you see how the different modeling strategies produce related estimates.
+
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+## The Final Verdict
+
+### Summary
+
+**Did increasing benefits increase how long claimants stayed on workers compensation benefits??**
+
+Let's bring together everything we've learned from this analysis:
+
+```{r, results='asis'}
+# Final summary table
+stargazer(DID_model,
+          #type = "html",
+          type = "text",
+          dep.var.labels = "Injury Duration (weeks)",
+          column.labels = "Final DID Model",
+          covariate.labels = c("Constant (β0)",
+                               "Group (β1)", 
+                               "Post (β2)", 
+                               "Group x Post (β3)"),
+          omit.stat = c("f", "ser"),
+          digits = 2,
+          intercept.bottom = FALSE,
+          title = "Difference-in-Differences: Kentucky Workers' Compensation Reform")
+```
+
+### Key Findings
+
+```{r}
+# Summarize key findings
+
+cat("BASELINE (Michigan, Pre-1980):\n")
+cat("  Average injury duration:", round(b0, 2), "weeks\n\n")
+
+cat("PRE-EXISTING DIFFERENCES:\n")
+cat("  Kentucky vs Michigan (before policy):", round(b1, 2), "weeks\n")
+cat("  Significant?", ifelse(summary(DID_model)$coefficients[2,4] < 0.05, "Yes", "No"), "\n\n")
+
+cat("SECULAR TREND (What happened everywhere):\n")
+cat("  Change in Michigan over time:", round(b2, 2), "weeks\n")
+cat("  Significant?", ifelse(summary(DID_model)$coefficients[3,4] < 0.05, "Yes", "No"), "\n\n")
+
+cat("TREATMENT EFFECT (The policy impact):\n")
+cat("  Additional change in Kentucky:", round(b3, 2), "weeks\n")
+cat("  Significant?", ifelse(summary(DID_model)$coefficients[4,4] < 0.05, "Yes", "No"), "\n\n")
+
+cat("COUNTERFACTUAL ANALYSIS:\n")
+cat("  Expected KY duration without policy:", round(counterfactual_calc, 2), "weeks\n")
+cat("  Actual KY duration with policy:", round(actual_outcome, 2), "weeks\n")
+cat("  Difference (treatment effect):", round(treatment_effect, 2), "weeks\n")
+cat("═══════════════════════════════════════════════════════════════\n")
+```
+
+### Conclusion
+
+**Did increasing workers' compensation benefits lead to longer durations of time on workers compensation?**
+
+**The evidence is inconclusive.** While we observe a difference, it is not statistically significant at the $p < 0.05$ level.
+
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">

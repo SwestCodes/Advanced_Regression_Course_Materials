@@ -1,0 +1,804 @@
+---
+title: "Fixed Effects with Panel Data | Codethrough"
+subtitle: "PAF 512 - Advanced Regression"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    code_folding: show
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+<style>
+  /* --- ASU Theme Elements --- */
+  
+  /* Maroon Headers */
+  h1, h2, h3, h4 {
+    color: #8C1D40 !important;
+  }
+  
+  /* Gold Links */
+  a {
+    color: #D4AF37 !important;
+  }
+  
+/* --- The Instructor Note Box --- */
+  .instructor-note {
+    background-color: #fff8e1 !important; 
+    
+    border-left: 6px solid #8C1D40;
+    color: #2c3e50;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .instructor-note strong {
+    color: #8C1D40;
+    font-size: 1.1em;
+  }
+
+  /* --- Table of Contents Styling --- */
+
+  /* 1. Active State (The section you are currently reading) */
+  .list-group-item.active, 
+  .list-group-item.active:focus, 
+  .list-group-item.active:hover {
+    background-color: #8C1D40 !important;
+    border-color: #8C1D40 !important;
+    color: white !important;
+  }
+
+  /* 2. Level 2 Headers (##) -> GOLD Bar */
+  /* This targets any subheader */
+  .tocify-subheader .list-group-item {
+    background-color: #f9f9f9; 
+    border-left: 4px solid #FFC627 !important; /* ASU Gold */
+    font-size: 0.9em; 
+    color: #555; 
+    padding-left: 15px !important; 
+  }
+
+  /* 3. Level 3 Headers (###) -> MAROON Bar */
+  /* This targets a subheader INSIDE another subheader */
+  .tocify-subheader .tocify-subheader .list-group-item {
+    border-left: 4px solid #8C1D40 !important; /* ASU Maroon */
+    padding-left: 30px !important; /* Double the indentation */
+  }
+
+  /* 4. Hover Effects */
+  .tocify-subheader .list-group-item:hover {
+    background-color: #fffdf2 !important;
+    color: #8C1D40 !important;
+  }
+  /* --- Code Block High Contrast Overrides --- */
+
+  /* 1. The Code Block Container */
+  pre {
+    background-color: #f4f4f4 !important; /* Light grey background */
+    border: 1px solid #ddd !important;     /* Subtle border definition */
+    color: #212529 !important;             /* Force base text to be VERY dark grey */
+    font-weight: 500;                      /* Make text slightly thicker */
+  }
+
+  /* 2. Comments (The most important fix) */
+  /* We target the class '.co' which R uses for comments */
+  code span.co {
+    color: #486a48 !important; /* A dark, readable forest green */
+    font-style: italic;        /* Italicize to differentiate from code */
+    font-weight: normal;       /* Keep comments lighter weight */
+  }
+
+  /* 3. Strings (Text inside quotes) */
+  code span.st {
+    color: #8C1D40 !important; /* Use ASU Maroon for strings! */
+    font-weight: bold;
+  }
+  
+  /* 4. Numbers and Keywords */
+  code span.dv, code span.kw {
+     color: #004d40 !important; /* Dark teal for numbers/logic */
+  }
+  /* make tables use fixed layout and wrap long text nicely */
+table.tbl-fixed {
+  table-layout: fixed;
+  width: 100%;
+  border-collapse: collapse;
+}
+table.tbl-fixed th,
+table.tbl-fixed td {
+  white-space: normal;        /* allow wrapping */
+  word-wrap: break-word;
+  padding: 10px 12px;        /* more breathing room */
+  vertical-align: top;
+}
+table.tbl-fixed th {         /* header alignment and style */
+  text-align: left;
+  font-weight: 600;
+}
+</style>
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+
+
+# What Will We Cover?
+
+#### 1. When to Use Fixed Effects
+-   Comparing FE to ITS and DID
+-   The Key Requirement: Panel Data
+
+#### 2. The Core Concept: Heterogeneity Bias
+-   Between vs. Within Variation
+-   Simpson's Paradox in Action
+
+#### 3. Running Fixed Effects Models
+-   Pooled OLS (The Naive Approach)
+-   Fixed Effects with `lm()` and Dummy Variables
+-   Fixed Effects with `plm()` (Professional Standard)
+
+#### 4. Model Diagnostics
+-   Testing FE vs. Pooled OLS with `pFtest()`
+-   Retrieving Group Intercepts with `fixef()`
+
+#### 5. Interpreting Coefficients
+-   Within-Group Effects
+-   Working with Proportion Variables
+
+#### 6. The De-Meaning Approach
+-   Mathematical Equivalence to Dummy Variables
+
+#### 7. Time-Invariant Variables
+-   What Fixed Effects Can and Cannot Estimate
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+
+# When to Use Fixed Effects
+
+## Comparing Methods
+
+Throughout this course, we've learned several methods for estimating causal effects from observational data. Here's how they compare:
+
+<div class="tbl-fixed">
+| Method | Data Structure | Key Requirement | Counterfactual Based On |
+|--------|---------------:|----------------:|------------------------:|
+| `Interrupted Time Series` | One group, many time points | Clear intervention point | Pre-treatment trend projection |
+| `Difference-in-Differences` | Treatment & control groups, pre/post | Parallel trends assumption | Control group's change |
+| `Fixed Effects` | Many groups, multiple time points | Within-group variation in X | Each group's own baseline |
+</div>
+
+## When is Fixed Effects Appropriate?
+
+Fixed effects is ideal when:
+
+1. **You have panel data** - The same entities (people, states, companies) observed repeatedly over time
+2. **You're worried about unobserved heterogeneity** - Stable characteristics of entities that affect both X and Y
+3. **Your policy variable changes within entities over time** - If X never changes within a group, FE cannot estimate its effect
+
+<div class="instructor-note">
+**Instructor's Note:**
+
+The key insight of fixed effects is that each entity serves as its own control. Instead of comparing different people/states/companies to each other (which invites selection bias), we compare each entity to itself over time. This eliminates all time-invariant confounders—even ones we can't measure.
+</div>
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+# Data
+
+## The Policy Question
+
+> **Research Question:** Does union membership increase wages?
+
+The "union wage premium" is a classic question in labor economics. Union members typically earn more than non-union workers, but is this because unions actually raise wages, or because workers who join unions are different in ways that would make them earn more anyway (e.g., more motivated, in certain industries, etc.)?
+
+> **Hypothesis:** Union membership increases wages, controlling for individual characteristics.
+
+## Dataset: Panel Study of Income Dynamics
+
+We'll use the `wagepan` dataset from the `wooldridge` package, which contains data from the Panel Study of Income Dynamics (PSID)—a nationally representative longitudinal survey that has followed the same families since 1968.
+
+- **Structure:** 545 individuals observed over 8 years (1980-1987)
+- **Total Observations:** 4,360
+- **Outcome Variable:** Log wages (`lwage`)
+- **Policy Variable:** Union membership (`union`)
+
+## Setup and Data Loading
+
+```{r}
+# Install/Load Packages
+# install.packages("wooldridge")
+# install.packages("plm")
+# install.packages("stargazer")
+# install.packages("dplyr")
+# install.packages("lmtest")
+# install.packages("sandwich")
+
+library(wooldridge)   # Contains the wagepan dataset
+library(plm)          # For panel data models
+library(stargazer)    # Clean regression tables
+library(dplyr)        # Data manipulation
+library(lmtest)       # For robust hypothesis testing
+library(sandwich)     # For robust covariance matrix estimators
+```
+
+## Load and Inspect Data
+
+```{r}
+# Load the wagepan dataset
+data("wagepan")
+
+# Examine the structure
+str(wagepan[, c("nr", "year", "lwage", "union", "married", "educ", "black", "exper")])
+```
+
+```{r}
+# Preview data for a few individuals
+
+d <- wagepan[wagepan$nr %in% c(13, 17, 45),]
+
+d <- d[,c("nr", "year", "lwage", "union", "married", "educ", "black")]
+
+head(d, 15)
+
+```
+
+## Key Variables
+
+```{r}
+# Summary statistics
+summary(wagepan[, c("lwage", "union", "married", "educ", "black", "exper")])
+```
+
+**Variable Descriptions:**
+<div class="tbl-fixed">
+| Variable | Description | Time-Varying? |
+|----------|-------------|---------------|
+| `nr` | Person identifier | - |
+| `year` | Year (1980-1987) | - |
+| `lwage` | Log of hourly wage | Yes |
+| `union` | Union member (1=yes, 0=no) | Yes |
+| `married` | Married (1=yes, 0=no) | Yes |
+| `exper` | Years of work experience | Yes |
+| `educ` | Years of education | **No** |
+| `black` | Black (1=yes, 0=no) | **No** |
+| `hisp` | Hispanic (1=yes, 0=no) | **No** |
+</div>
+
+<div class="instructor-note">
+**Instructor's Note:**
+
+**Part One: Time-Invariant Variables**
+Notice that `educ`, `black`, and `hisp` are time-invariant—they don't change for an individual over the 8-year study period. This will be important later when we see that fixed effects cannot estimate the coefficients for these variables.
+
+**Part Two: Why `lwage` instead of `wage`?**
+
+* **The Problem:** Wage data is almost always right-skewed (a few high earners pull the average up), which biases OLS regression. By logging the wages, we normalize the distribution to satisfy model assumptions. 
+* **Crucial Interpretation Change:** Because $y$ is logged, our coefficients represent a *percentage change*, not a dollar change. $\beta = 0.10$ means a 10% increase in wages (not a 10 cent increase).
+</div>
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+# The Core Problem
+
+## What is Heterogeneity Bias?
+
+Heterogeneity bias occurs when unobserved differences between groups (heterogeneity) are correlated with both the independent variable and the outcome. In our context:
+
+- **Unobserved Heterogeneity:** Individual traits like motivation, ability, career ambition
+- **Correlation with X (union):** More motivated workers might be more likely to seek union jobs
+- **Correlation with Y (wages):** More motivated workers might earn higher wages regardless of union status
+
+If we ignore this heterogeneity, we might incorrectly attribute higher wages to union membership when they're actually due to these unobserved individual traits.
+
+## Between vs. Within Variation
+
+This is the fundamental distinction in panel data analysis:
+
+**Between Variation:** Differences *across* individuals (comparing Person A to Person B)
+
+- Person A averages \$20/hour; Person B averages \$15/hour
+- This variation is confounded by all the ways A and B differ
+
+**Within Variation:** Differences *within* the same individual over time (comparing Person A in 1980 to Person A in 1985)
+
+- Person A earned \$18/hour before joining union, \$22/hour after
+- This variation holds constant everything about Person A that doesn't change
+
+Fixed effects isolates within variation by giving each individual their own intercept, effectively asking: "When this specific person joins a union, do their wages increase?"
+
+## Visualizing the Problem
+
+Let's see how pooled OLS (which mixes between and within variation) can give misleading results:
+
+```{r, fig.width=10, fig.height=6}
+# Calculate individual means for visualization
+ind_means <- wagepan %>%
+  group_by(nr) %>%
+  summarise(
+    mean_union = mean(union),
+    mean_lwage = mean(lwage),
+    ever_union = max(union),
+    .groups = "drop"
+  )
+
+# Plot individual means
+plot(ind_means$mean_union, ind_means$mean_lwage,
+     pch = 19, col = adjustcolor("steelblue", 0.3),
+     xlab = "Average Union Membership (0-1)",
+     ylab = "Average Log Wage",
+     main = "Between-Person Variation: Individual Averages")
+
+# Add pooled regression line
+abline(lm(mean_lwage ~ mean_union, data = ind_means), col = "red", lwd = 2)
+
+legend("topright", 
+       legend = c("Individual averages", "Between-person slope"),
+       col = c("steelblue", "red"),
+       pch = c(19, NA),
+       lty = c(NA, 1),
+       lwd = c(NA, 2))
+```
+
+The slope in this plot represents the *between-person* relationship. But this could be driven by the types of people who join unions, not the effect of union membership itself.
+
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+# Pooled OLS
+
+## The Model
+
+A pooled OLS model ignores the panel structure and treats all observations as independent:
+
+$$lwage_{it} = \beta_0 + \beta_1 \cdot union_{it} + \beta_2 \cdot exper_{it} + \beta_3 \cdot married_{it} + \beta_4 \cdot educ_{i} + \beta_5 \cdot black_{i} + \epsilon_{it}$$
+
+Where $i$ indexes individuals and $t$ indexes time.
+
+## Running Pooled OLS
+
+```{r, results='asis'}
+# Pooled OLS model
+pooled_ols <- lm(lwage ~ union + exper + married + educ + black, data = wagepan)
+
+stargazer(pooled_ols,
+          #type = "html",
+          type = "text",
+          title = "Pooled OLS: Union Wage Premium",
+          dep.var.labels = "Log Wage",
+          covariate.labels = c("Agg Baseline", "Union Member", "Experience (years)", 
+                               "Married", "Education (years)", "Black"),
+          omit.stat = c("f", "ser"),
+          digits = 3,
+          intercept.bottom = FALSE)
+```
+
+## Interpreting Pooled OLS Results
+
+The union coefficient is approximately 0.18, suggesting that union members earn about 18% more than non-union workers (since the outcome is log wages, we can interpret coefficients as approximate percentage changes).
+
+**But can we trust this estimate?**
+
+The pooled OLS estimate combines:
+
+1. The *within-person* effect of joining a union
+2. The *between-person* differences in who joins unions
+
+If high-ability workers are more likely to both (a) join unions and (b) earn higher wages, then the pooled estimate will be **biased upward**—we'll attribute to unions what is actually due to ability.
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+# Fixed Effects
+
+## The Model
+
+The fixed effects model adds a separate intercept for each individual:
+
+$$lwage_{it} = \beta_1 \cdot union_{it} + \beta_2 \cdot exper_{it} + \beta_3 \cdot married_{it} + \alpha_i + \epsilon_{it}$$
+
+Where $\alpha_i$ is the individual-specific intercept (the "fixed effect").
+
+**Notice what's missing:** `educ` and `black` are gone! Since they don't vary within individuals over time, they're absorbed into $\alpha_i$.
+
+## Method 1: Fixed Effects with `lm()` and Dummy Variables
+
+We can estimate fixed effects by including a dummy variable for each individual:
+
+```{r, results='asis'}
+# Fixed effects using lm() with individual dummies
+# The -1 removes the global intercept so each person gets their own
+fe_lm <- lm(lwage ~ union + exper + married + factor(nr) - 1, data = wagepan)
+
+# Display only the policy variables (not all 545 individual dummies!)
+stargazer(fe_lm,
+          #type = "html",
+          type = "text",
+          title = "Fixed Effects with lm(): Union Wage Premium",
+          dep.var.labels = "Log Wage",
+          covariate.labels = c("Union Member", "Experience (years)", "Married"),
+          keep = c("union", "exper", "married"),
+          omit.stat = c("f", "ser"),
+          digits = 3)
+```
+
+<div class="instructor-note">
+**Instructor's Note:**
+
+We use `keep = c("union", "exper", "married")` in stargazer to hide the 545 individual dummy coefficients. They exist in the model—we're just not displaying them. You can see them with `summary(fe_lm)` if you're curious (but it's a lot of output!).
+</div>
+
+## Method 2: Fixed Effects with `plm()` (Professional Standard)
+
+The `plm` package is designed specifically for panel data and handles fixed effects more efficiently:
+
+```{r, results='asis'}
+# Fixed effects using plm()
+fe_plm <- plm(lwage ~ union + exper + married, 
+              data = wagepan,
+              index = c("nr", "year"),  # Identify panel structure (i.e., group levels)
+              model = "within")         # "within" = fixed effects
+
+stargazer(fe_plm,
+          #type = "html",
+          type = "text",
+          title = "Fixed Effects with plm(): Union Wage Premium",
+          dep.var.labels = "Log Wage",
+          covariate.labels = c("Union Member", "Experience (years)", "Married"),
+          omit.stat = c("f", "ser"),
+          digits = 3)
+```
+
+## Comparing Results
+
+```{r, results='asis'}
+# Side-by-side comparison
+stargazer(pooled_ols, fe_lm, fe_plm,
+          #type = "html",
+          type = "text",
+          title = "Pooled OLS vs. Fixed Effects (lm) vs. Fixed Effects (plm)",
+          dep.var.labels = "Log Wage",
+          column.labels = c("Pooled OLS", "Fixed Effects (lm)", "Fixed Effects (plm)"),
+          covariate.labels = c("Agg Baseline", "Union Member", "Experience (years)", 
+                               "Married", "Education (years)", "Black"),
+          omit.stat = c("f", "ser"),
+          keep = c("Constant", "union", "exper", "married", "educ", "black"), # hides the hundreds of individual intercepts
+          digits = 3,
+          intercept.bottom = FALSE)
+```
+
+## Clustered Standard Errors (Autocorrelation)
+
+While our Fixed Effects model (`fe_plm`) correctly estimates the *coefficients* (the slopes), there is still a potential problem with our *standard errors* (the precision).
+
+**The Problem: Autocorrelation**
+In panel data, we observe the same individuals over multiple years. It is highly likely that a person's unobserved factors in 1980 are correlated with their unobserved factors in 1981. This violates the regression assumption that all error terms are independent.
+
+If we ignore this "serial correlation," our standard errors will typically be **too small**, making us overconfident in our results (i.e., we might find a significant effect where none exists).
+
+### Check Autocorrelation
+
+Let's begin by checking for significant autocorrelation in our data using `acf()`. Recall from module 1 that if a vertical line passes the horizontal blue lines there is significant autocorrelation and therefore we need to check clustered standard errors. 
+```{r}
+# Extract the residuals from the Fixed Effects model
+fe_residuals <- residuals(fe_plm)
+
+# Plot the Autocorrelation Function (ACF)
+# We use main="" to give it a custom title
+acf(fe_residuals, main = "ACF of Residuals: Checking for Serial Correlation")
+```
+Our `acf()` plot detects significant autocorrelation at lags 1 through 7. We know we have autocorrelation in our data, what do we do now?
+
+**The Solution: Clustered Standard Errors**
+To fix this, we use **Clustered Standard Errors**. This method adjusts the standard errors to allow for correlation *within* each individual (cluster), while maintaining independence *across* different individuals.
+
+### Calculating Robust Errors
+```{r}
+# Calculate the Clustered Variance-Covariance Matrix
+# type = "HC1"
+# cluster = "group" clusters errors by the entity index (nr)
+# using group tells vcovHC() to use our first index variable we designated at the time we built our model
+clustered_se <- vcovHC(fe_plm, type = "HC1", cluster = "group")
+
+# View the test with robust standard errors
+coeftest(fe_plm, vcov = clustered_se)
+```
+
+Calculating clustered standard errors caused our `married` coefficient to become slightly less significant (moving from p < 0.01 to p < 0.05), but it still remains statistically significant at the 0.05 level.
+
+## Key Findings
+<div class="instructor-note">
+**Instructor's Note:**
+
+Technically speaking, when working with logged values, the correct way to interpret the value is to exponentiate the coefficient and subtract $1$, then multiply by $100$ ($100 \cdot (e^\beta - 1$). For our purposes, and given our coefficients are small, we can approximate the % change directly. For larger coefficients or in a real analysis, use the exact formula. Try it on your own and see what the difference is.
+
+</div>
+
+**Union coefficient dropped substantially:**
+
+- Pooled OLS: ~0.18 (18% wage premium)
+- Fixed Effects: ~0.08 (8% wage premium)
+
+**Interpretation:** About half of the apparent "union wage premium" in the pooled model was actually due to individual heterogeneity—the types of people who join unions, not the effect of union membership itself. Once we control for all time-invariant individual characteristics, the true within-person effect of joining a union is approximately 8%.
+
+**Note on Education and Race:** These variables are absent from the FE model because they don't change within individuals over time. Fixed effects automatically controls for these factors (and all other time-invariant characteristics) through the individual intercepts.
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+# Model Diagnostics
+
+## Testing FE vs. Pooled OLS: The F-Test
+
+The `pFtest()` function formally tests whether fixed effects are necessary:
+
+- **Null Hypothesis ($H_0$):** Pooled OLS is adequate (individual effects are all zero)
+- **Alternative Hypothesis ($H_1$):** Fixed effects are needed (individual effects matter)
+
+```{r}
+# F-test for individual effects
+pFtest(fe_plm, pooled_ols)
+```
+
+**Interpretation:** With an F-statistic this large and p-value essentially zero, we strongly reject the null hypothesis. Individual fixed effects are definitely needed—there is significant unobserved heterogeneity across individuals that affects wages.
+
+## Retrieving Individual Intercepts: `fixef()`
+
+While `plm()` doesn't display the individual intercepts in the main output, we can retrieve them using `fixef()`. 
+
+```{r}
+# Get the individual fixed effects (logged)
+individual_effects <- fixef(fe_plm)
+
+# Show first 10
+head(individual_effects, 10)
+```
+
+```{r}
+# Summary of the distribution of individual effects
+summary(as.numeric(individual_effects))
+```
+
+**Interpretation:** These intercepts represent each individual's estimated logged wage (when all covariates equal zero). The wide range (from about $-0.01$ to $2.90$) shows substantial individual heterogeneity—exactly what fixed effects is designed to control for.
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+# Interpreting Coefficients
+
+## Within-Group Effects
+
+The fixed effects coefficient on `union` (≈0.08) tells us:
+
+> "When the *same individual* transitions from non-union to union status, their log wage increases by approximately 0.08, or about 8%."
+
+This is fundamentally different from the pooled OLS interpretation:
+
+> "Union members earn about 18% more than non-union members."
+
+The FE interpretation isolates the causal effect of union membership by comparing each person to themselves.
+
+## Working with Proportion/Percentage Variables
+
+<div class="instructor-note">
+**Instructor's Note: Heads up, this is important for your lab!**
+
+Your lab uses a beer tax variable measured as a proportion (0 to 1, where 0.50 = 50% tax rate). Interpreting such coefficients requires care.
+
+**The Issue:** A "1-unit increase" in a proportion variable means going from 0% to 100%—which is unrealistic and not meaningful.
+
+**The Solution:** Scale the interpretation to meaningful increments:
+
+If, hypothetically, your coefficient is -17.6 for a proportion variable:
+
+- **1-unit increase (0 -> 1, or 100 percentage points):** $-17.6$ accidents *(not meaningful)*
+- **0.10-unit increase (10 percentage points):** $-17.6 × 0.10 = -1.76$ accidents *(more meaningful)*
+- **0.01-unit increase (1 percentage point):** $-17.6 × 0.01 = -0.176$ accidents *(most policy-relevant)*
+
+**General Rule:** Divide the coefficient by 100 to get the effect of a 1 percentage point change, or by 10 to get the effect of a 10 percentage point change.
+</div>
+
+## Example with Our Data
+
+Our union variable is binary (0 or 1), so interpretation is straightforward:
+
+- Going from `union = 0` to `union = 1` (joining a union) increases log wages by ~0.08
+- Since our outcome is in logs, this translates to approximately an 8% wage increase
+
+For continuous variables like `exper`:
+
+- The coefficient ~0.11 means each additional year of experience increases wages by about 11%
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+# The De-Meaning Approach
+
+## Mathematical Equivalence
+
+Fixed effects can be estimated by "de-meaning" the data—subtracting each group's mean from every observation. This is mathematically equivalent to including dummy variables.
+
+**The Logic:**
+
+1. For each individual, calculate their average of each variable over time
+2. Subtract these averages from each observation
+3. Run OLS on the de-meaned data
+
+This removes all between-person variation, leaving only within-person variation.
+
+## Implementing De-Meaning
+
+```{r}
+# De-mean the data by individual
+wagepan_demeaned <- wagepan %>%
+  group_by(nr) %>%
+  mutate(
+  # We overwrite the original columns so our variables match across models
+  # this allows us a clean side-by-side comparison with our other models
+  # in the next stargazer table
+    lwage = lwage - mean(lwage), 
+    union = union - mean(union),
+    exper = exper - mean(exper),
+    married = married - mean(married)
+  ) %>%
+  ungroup()
+
+# Check that means are now zero (within rounding)
+wagepan_demeaned %>%
+  summarise(
+    mean_lwage_dm = round(mean(lwage), 10),
+    mean_union_dm = round(mean(union), 10)
+  )
+```
+
+```{r, results='asis'}
+# Run OLS on de-meaned data
+demeaned_ols <- lm(lwage ~ union + exper + married - 1, 
+                   data = wagepan_demeaned)
+
+# Compare to plm() fixed effects
+stargazer(fe_plm, demeaned_ols,
+          #type = "html",
+          type = "text",
+          title = "Fixed Effects vs. De-Meaned OLS",
+          dep.var.labels = c("Log Wage", "Log Wage (de-meaned)"),
+          column.labels = c("FE with plm()", "De-meaned OLS"),
+          covariate.labels = c("Union Member", "Experience", "Married"),
+          omit.stat = c("f", "ser"),
+          digits = 4)
+```
+
+**Result:** The coefficients are identical! This demonstrates that:
+
+1. De-meaning and dummy variables are mathematically equivalent
+2. Fixed effects works by removing all stable between-group differences
+3. Only within-group variation contributes to the coefficient estimates
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+# Time-Invariant Variables
+
+## What Fixed Effects Cannot Estimate
+
+A critical limitation of fixed effects is that it **cannot estimate the effect of time-invariant variables**. Let's see this in action using education from our wagepan dataset.
+
+<div class="instructor-note">
+**Instructor's Note:**
+
+You may be thinking, why would education be constant over time? You are right to question that. In this specific dataset, the participants' education levels are static-they did not change over time. Since Fixed Effects requires within-person variation to work, it treats Education just like Gender or Race—as a fixed characteristic that gets absorbed into the intercept.
+
+</div>
+
+```{r, results = 'asis', error=TRUE}
+# Try to include education (time-invariant) in the FE model
+fe_with_educ <- plm(lwage ~ union + exper + married + educ, 
+                    data = wagepan,
+                    index = c("nr", "year"),
+                    model = "within")
+
+stargazer(fe_with_educ,
+          type = "text",
+          #type = "html",
+          digits = 3)
+
+```
+
+**What happened?** The `educ` variable was dropped because it's perfectly collinear with the individual fixed effects. Since education doesn't change over time for any individual, it's completely absorbed by the individual intercept.
+
+
+## Why This Happens
+
+Think about de-meaning:
+
+- If `educ = 12` for Person A in every year, then `mean(educ) = 12`
+- De-meaned education = `12 - 12 = 0` for every observation
+- A variable that's always zero provides no information for estimation
+
+The same logic applies to `black`, `hisp`, and any other characteristic that doesn't change within individuals over time.
+
+## Implications for Research
+
+**Fixed effects CAN answer:**
+
+- "Does joining a union raise *this person's* wages?"
+- "Does getting married change *this person's* wages?"
+
+**Fixed effects CANNOT answer:**
+
+- "Do more educated people earn more?"
+- "Is there a racial wage gap?"
+
+To answer questions about time-invariant characteristics, you would need different methods (random effects, cross-sectional analysis, etc.), each with their own assumptions and limitations.
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+# Conclusion
+
+## Summary of Key Concepts
+
+**1. The Problem: Heterogeneity Bias**
+
+- Unobserved differences between groups can bias our estimates
+- Pooled OLS mixes between-group and within-group variation
+
+**2. The Solution: Fixed Effects**
+
+- Include a separate intercept for each group
+- Isolates within-group variation only
+- Controls for ALL time-invariant characteristics (even unmeasured ones)
+
+**3. Implementation**
+
+- `lm()` with dummy variables: Explicit but cumbersome for many groups
+- `plm()` with `model = "within"`: Professional standard, computationally efficient
+- De-meaning: Mathematically equivalent, builds intuition
+
+**4. Diagnostics**
+
+- `pFtest()`: Formally test whether FE is needed vs. pooled OLS
+- `fixef()`: Retrieve the group-specific intercepts
+
+**5. Limitations**
+
+- Cannot estimate effects of time-invariant variables
+- Requires within-group variation in the policy variable
+- Assumes no time-varying confounders
+
+## The Union Wage Premium: Final Verdict
+
+Our analysis revealed that:
+
+- **Pooled OLS** suggested an 18% union wage premium
+- **Fixed Effects** reduced this to about 8%
+
+The difference (~10 percentage points) represents **heterogeneity bias**—the portion of the apparent wage premium that was actually due to the types of people who join unions, not union membership itself.
+
+The fixed effects estimate of ~8% represents our best estimate of the *causal* effect of union membership on wages, controlling for all stable individual characteristics.
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
+
+# Quick Reference for Lab
+
+## Key Functions
+
+| Function | Purpose | Package |
+|----------|---------|---------|
+| `lm(y ~ x + factor(group) - 1)` | FE with explicit dummies | base R |
+| `plm(y ~ x, index = "group", model = "within")` | FE (professional) | plm |
+| `pFtest(fe_model, ols_model)` | Test FE vs. pooled OLS | plm |
+| `fixef(fe_model)` | Retrieve group intercepts | plm |
+
+## Interpreting Proportion Variables
+
+If your X variable is a proportion (0 to 1):
+
+- **Coefficient ÷ 100** = effect of 1 percentage point change
+- **Coefficient ÷ 10** = effect of 10 percentage point change
+- **Coefficient × 1** = effect of 100 percentage point change (usually not meaningful)
+
+ <hr style="border: 2px solid #FFC627; width: 90%;">
