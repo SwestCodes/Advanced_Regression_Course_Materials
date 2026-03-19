@@ -13,7 +13,8 @@ cat("Base directory:", base_dir, "\n")
 # Find all Rmd files (case-insensitive)
 rmds <- list.files(
   path = base_dir,
-  pattern = "\\.[Rr][Mm][Dd]$",
+  # This looks for any file that ends in _WEB.Rmd (case-insensitive)
+  pattern = "_[Ww][Ee][Bb]\\.[Rr][Mm][Dd]$",
   full.names = TRUE,
   recursive = TRUE
 )

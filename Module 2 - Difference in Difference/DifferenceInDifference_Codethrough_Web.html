@@ -1570,6 +1570,25 @@ border-radius: 0px;
 
 
 
+<style>
+
+.asu-nav-link:hover {
+color: #FFC627 !important; 
+text-decoration: none;
+}
+</style>
+
+<div style="background-color: #8C1D40; padding: 15px 25px; margin-bottom: 25px; border-bottom: 5px solid #FFC627; border-radius: 4px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; font-family: &#39;Segoe UI&#39;, Tahoma, Geneva, Verdana, sans-serif;">
+    
+    <a href="../index.html" class="asu-nav-link" style="color: #ffffff !important; text-decoration: none; font-weight: bold; font-size: 16px; transition: color 0.2s;">
+        ◀ Back to Course Hub
+    </a>
+
+    <span style="color: #ffffff; font-weight: bold; letter-spacing: 0.5px; font-size: 15px;">
+        PAF 512 <span style="color: #FFC627; margin: 0 5px;">|</span> Advanced Regression
+    </span>
+
+</div>
 
 <div id="header">
 
@@ -2249,7 +2268,7 @@ coef_summary &lt;- data.frame(
     &quot;Change in control group over time (secular trend)&quot;,
     &quot;Additional change in treatment group (treatment effect)&quot;),
   Hypothesis = c(
-    &quot;Is control pre-treatment mean ≠ 0?&quot;,
+    &quot;Is control pre-treatment mean != 0?&quot;,
     &quot;Did groups differ before treatment?&quot;,
     &quot;Did control group change over time?&quot;,
     &quot;Did treatment have an effect?&quot;)
@@ -2262,7 +2281,7 @@ Interpretation (Intercept) Control group mean before treatment Group
 Difference between groups before treatment Post Change in control group
 over time (secular trend) Group_Post Additional change in treatment
 group (treatment effect) Hypothesis (Intercept) Is control pre-treatment
-mean ≠ 0? Group Did groups differ before treatment? Post Did control
+mean != 0? Group Did groups differ before treatment? Post Did control
 group change over time? Group_Post Did treatment have an effect?</p>
 <hr style="border: 2px solid #FFC627; width: 90%;">
 </div>

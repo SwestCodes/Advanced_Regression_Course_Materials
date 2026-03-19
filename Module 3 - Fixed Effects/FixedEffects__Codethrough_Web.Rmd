@@ -7,6 +7,8 @@ output:
     toc_float: true
     theme: flatly
     code_folding: show
+    includes:
+      before_body: "../nav.html"
 editor_options: 
   markdown: 
     wrap: sentence

@@ -1570,6 +1570,25 @@ border-radius: 0px;
 
 
 
+<style>
+
+.asu-nav-link:hover {
+color: #FFC627 !important; 
+text-decoration: none;
+}
+</style>
+
+<div style="background-color: #8C1D40; padding: 15px 25px; margin-bottom: 25px; border-bottom: 5px solid #FFC627; border-radius: 4px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; font-family: &#39;Segoe UI&#39;, Tahoma, Geneva, Verdana, sans-serif;">
+    
+    <a href="../index.html" class="asu-nav-link" style="color: #ffffff !important; text-decoration: none; font-weight: bold; font-size: 16px; transition: color 0.2s;">
+        ◀ Back to Course Hub
+    </a>
+
+    <span style="color: #ffffff; font-weight: bold; letter-spacing: 0.5px; font-size: 15px;">
+        PAF 512 <span style="color: #FFC627; margin: 0 5px;">|</span> Advanced Regression
+    </span>
+
+</div>
 
 <div id="header">
 
@@ -4390,10 +4409,8 @@ mean_rules &lt;- mean(recid$rules)
 
 # The &quot;average&quot; person at mean values of all variables
 data.frame(mean_workprg, mean_priors, mean_tserved, mean_felon, mean_alcohol, mean_drugs, mean_black, mean_married, mean_educ, mean_age, mean_rules)</code></pre>
-<pre><code>##   mean_workprg mean_priors mean_tserved mean_felon mean_alcohol mean_drugs mean_black mean_married mean_educ mean_age
-## 1    0.4650519    1.431834     19.18201  0.3141869    0.2096886  0.2415225  0.4851211    0.2553633  9.702422  345.436
-##   mean_rules
-## 1   1.185467</code></pre>
+<pre><code>##   mean_workprg mean_priors mean_tserved mean_felon mean_alcohol mean_drugs mean_black mean_married mean_educ mean_age mean_rules
+## 1    0.4650519    1.431834     19.18201  0.3141869    0.2096886  0.2415225  0.4851211    0.2553633  9.702422  345.436   1.185467</code></pre>
 <pre class="r"><code># Extract coefficients
 b &lt;- coef(logit_model)
 

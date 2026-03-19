@@ -7,6 +7,8 @@ output:
     toc_float: true
     theme: flatly
     code_folding: show
+    includes:
+      before_body: "../nav.html"
 editor_options: 
   markdown: 
     wrap: sentence
@@ -425,7 +427,7 @@ coef_summary <- data.frame(
     "Change in control group over time (secular trend)",
     "Additional change in treatment group (treatment effect)"),
   Hypothesis = c(
-    "Is control pre-treatment mean ≠ 0?",
+    "Is control pre-treatment mean != 0?",
     "Did groups differ before treatment?",
     "Did control group change over time?",
     "Did treatment have an effect?")
