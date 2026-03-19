@@ -158,78 +158,7 @@
             color: rgba(255,255,255,0.32);
         }
 
-        .hero-meta-pill .dot {
-            width: 5px; height: 5px;
-            border-radius: 50%;
-            background: var(--gold);
-            opacity: 0.65;
-        }
 
-        .hero-scroll-cue {
-            position: absolute;
-            bottom: 2rem;
-            right: 3rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.5rem;
-            color: rgba(255,255,255,0.18);
-            font-family: 'DM Mono', monospace;
-            font-size: 0.62rem;
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-            writing-mode: vertical-rl;
-            z-index: 2;
-        }
-        .hero-scroll-cue::after {
-            content: '';
-            width: 1px;
-            height: 44px;
-            background: linear-gradient(to bottom, rgba(255,198,39,0.4), transparent);
-        }
-
-        /* ============================================================
-           STAT STRIP
-        ============================================================ */
-        .stat-strip {
-            background: var(--maroon);
-            padding: 1.35rem 0;
-        }
-
-        .stat-strip-inner {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0 3rem;
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 0;
-        }
-
-        .stat-item {
-            display: flex;
-            align-items: baseline;
-            gap: 0.7rem;
-            padding: 0 2.25rem;
-            border-right: 1px solid rgba(255,255,255,0.14);
-        }
-        .stat-item:last-child  { border-right: none; }
-        .stat-item:first-child { padding-left: 0; }
-
-        .stat-number {
-            font-family: 'Playfair Display', serif;
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--gold);
-            line-height: 1;
-        }
-
-        .stat-label {
-            font-size: 0.78rem;
-            color: rgba(255,255,255,0.6);
-            letter-spacing: 0.02em;
-            font-weight: 300;
-        }
 
         /* ============================================================
            MAIN
@@ -536,9 +465,6 @@
             .hero-inner, .main { padding-left: 1.5rem; padding-right: 1.5rem; }
             footer { padding: 2rem 1.5rem; }
             .hero-title { font-size: clamp(3rem, 13vw, 5rem); }
-            .hero-scroll-cue { display: none; }
-            .stat-strip-inner { gap: 1rem; padding: 0 1.5rem; }
-            .stat-item { padding: 0 1rem; }
             .module-card { grid-template-columns: 2.5rem 1fr; padding: 1.5rem; gap: 1rem; }
             .module-index { font-size: 1.4rem; padding-top: 0.2rem; }
             .module-arrow { display: none; }
@@ -548,8 +474,6 @@
         }
 
         @media (max-width: 480px) {
-            .stat-strip-inner { flex-direction: column; gap: 0.75rem; }
-            .stat-item { border-right: none; padding: 0; }
         }
     </style>
 </head>
@@ -576,36 +500,14 @@
             </p>
 
             <div class="hero-meta">
-                <div class="hero-meta-pill"><span class="dot"></span> PAF 512</div>
-                <div class="hero-meta-pill"><span class="dot"></span> 6 Methods · R · Wooldridge</div>
-                <div class="hero-meta-pill"><span class="dot"></span> Causal Inference · Policy Eval</div>
+                <div class="hero-meta-pill">PAF 512</div>
+                <div class="hero-meta-pill">6 Methods &nbsp;·&nbsp; R</div>
+                <div class="hero-meta-pill">Causal Inference &nbsp;·&nbsp; Policy Eval</div>
             </div>
         </div>
 
-        <div class="hero-scroll-cue">Scroll</div>
     </section>
 
-    <!-- ===================== STATS STRIP ===================== -->
-    <div class="stat-strip">
-        <div class="stat-strip-inner">
-            <div class="stat-item">
-                <span class="stat-number">6</span>
-                <span class="stat-label">Quasi-Experimental Methods</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-number">6</span>
-                <span class="stat-label">Real Policy Datasets</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-number">2SLS</span>
-                <span class="stat-label">IV &amp; Endogeneity Coverage</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-number">R</span>
-                <span class="stat-label">Live Annotated Code</span>
-            </div>
-        </div>
-    </div>
 
     <!-- ===================== MODULES ===================== -->
     <main class="main">
@@ -620,7 +522,7 @@
 
         <div class="module-grid">
 
-            <a href="Module 1 - Interrupted Time Series/ITS_Codethrough_Web.html" class="module-card">
+            <a href="Module_1_Interrupted_Time_Series/ITS_Codethrough_Web.html" class="module-card">
                 <span class="module-index">01</span>
                 <div class="module-body">
                     <p class="module-context">Dataset: UKDriverDeaths &nbsp;·&nbsp; Great Britain, 1969–1984</p>
@@ -637,7 +539,7 @@
                 <span class="module-arrow">→</span>
             </a>
 
-            <a href="Module 2 - Difference in Difference/DifferenceInDifference_Codethrough_Web.html" class="module-card">
+            <a href="Module_2_Difference_In_Difference/DifferenceInDifference_Codethrough_Web.html" class="module-card">
                 <span class="module-index">02</span>
                 <div class="module-body">
                     <p class="module-context">Dataset: injury (Wooldridge) &nbsp;·&nbsp; Kentucky vs. Michigan, 1980</p>
@@ -654,7 +556,7 @@
                 <span class="module-arrow">→</span>
             </a>
 
-            <a href="Module 3 - Fixed Effects/FixedEffects_Codethrough_Web.html" class="module-card">
+            <a href="Module_3_Fixed_Effects/FixedEffects_Codethrough_Web.html" class="module-card">
                 <span class="module-index">03</span>
                 <div class="module-body">
                     <p class="module-context">Dataset: wagepan (Wooldridge) &nbsp;·&nbsp; PSID Panel, 1980–1987</p>
@@ -671,7 +573,7 @@
                 <span class="module-arrow">→</span>
             </a>
 
-            <a href="Module 4 - Instrumental Variables/IV_Codethrough_Web.html" class="module-card">
+            <a href="Module_4_Instrumental_Variables/IV_Codethrough_Web.html" class="module-card">
                 <span class="module-index">04</span>
                 <div class="module-body">
                     <p class="module-context">Dataset: mroz (Wooldridge) &nbsp;·&nbsp; 1976 Panel Study of Income Dynamics</p>
@@ -688,7 +590,7 @@
                 <span class="module-arrow">→</span>
             </a>
 
-            <a href="Module 5 - Regression Discontinuity Design/RDD_Codethrough_Web.html" class="module-card">
+            <a href="Module_5_Regression_Discontinuity_Design/RDD_Codethrough_Web.html" class="module-card">
                 <span class="module-index">05</span>
                 <div class="module-body">
                     <p class="module-context">Dataset: Senate Elections (rdrobust) &nbsp;·&nbsp; U.S. Senate, 1914–2010</p>
@@ -705,7 +607,7 @@
                 <span class="module-arrow">→</span>
             </a>
 
-            <a href="Module 6 - Logistic Regression/Logistic_Codethrough_Web.html" class="module-card">
+            <a href="Module_6_Logistic_Regression/Logistic_Codethrough_Web.html" class="module-card">
                 <span class="module-index">06</span>
                 <div class="module-body">
                     <p class="module-context">Dataset: recid (Wooldridge) &nbsp;·&nbsp; North Carolina Prisons, 1977–1978</p>
@@ -761,7 +663,7 @@
                 School of Public Affairs &nbsp;·&nbsp; PAF 512
             </div>
         </div>
-        <span class="footer-copy">© 2026 Arizona State University</span>
+        <span class="footer-copy">© 2026 Arizona State University &nbsp;·&nbsp; Design assisted by <a href="https://claude.ai" style="color: rgba(255,255,255,0.35); text-decoration: none;">Claude AI</a></span>
     </footer>
 
 </body>
